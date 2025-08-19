@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptFlow Pro for HTML</title>
+    <meta name="description" content="AI協調作業のための統合プロンプト開発環境 - 単一HTMLファイルで動作">
+    <meta name="theme-color" content="#1e293b">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yNDMyL3N2Zz48cGF0aCBmaWxsPSIjNGZkMWM1IiBkPSJNMTIgMmMyLjUgMC01LjM2IDIuOC01LjM2IDYuNTZzNC4xIDIuMiA1LjM2IDYuNzMtNC4xLTQuMjUtNS4zNi0xLjczLS41MiAyLjg3IDAgMi42OSAxLjUzLS44MSAwIDAtMi43NC01LjY5IDAtNy4xMiAyLjU2LS42NyA3LjY3LTEuMDIgMTAuMDgtMS40MSAyLjQxLS40IDUuMTUtLjY4IDcuMTUtLjY4TTEyIDJjNS41MiAwIDEwIDQuNDggMTAgMTBzLTQuNDggMTAtMTAgMTAtMTAtNC40OC0xMC0xMCAxMC0xMCAxMC0xem0tMS41IDcuNWgzaDFsMS45Ny01LjMyLS42MS0uNjItLjAxLjAxLTQuMzYgNC4zNmExLjc1MiAx.NzUyIDAgMCAwLS4xOSAyLjc3IDEuNzUyIDEuNzUyIDAgMCAwLTIuNzctLjE5bC0uNTUtLjU1MS4wNi0uMDYHMTcuNTIgMS43NTIgMCAwIDAtLjE5LTIuNzcgMS43NTIgMS43NTIgMCAwIDAtMi43Ny0uMTlsLTIuMDIgMi4wMmwtNS4zMi0xLjk3eiIvPjwvc3ZnPg==">
+
+    <style>
+        /* CSS Custom Properties for Branding */
+        :root {
+            --primary-color: #64748b; /* Slate gray for a sophisticated feel */
+            --secondary-color: #4fd1c5; /* Teal for a modern accent */
+            --background-dark: #1e293b; /* Dark navy for the main background */
+            --background-lighter: #334155; /* Slightly lighter for sections */
+            --text-primary: #f8fafc; /* Off-white for primary text */
+            --text-secondary: #cbd5e0; /* Light gray for labels and secondary text */
+            --border-color: #475569; /* Subtle border color */
+            --focus-ring: rgba(79, 209, 197, 0.4); /* Teal focus ring */
+            --font-family-base: 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif; /* Modern, clean base font */
+            --font-family-monospace: 'Consolas', 'Menlo', 'Courier New', monospace; /* Classic monospace font */
+            --card-bg-selected: #4a5568; /* Selected card background */
+            --card-border-selected: var(--secondary-color); /* Selected card border */
+            --tab-inactive-bg: #2d3748;
+            --tab-active-bg: var(--background-lighter);
+        }
+
+        /* Reset and Base Styles */
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-primary);
+            font-family: var(--font-family-base);
+            padding: 25px;
+            line-height: 1.6;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* 初回ロード時にコンテンツが一部表示されない問題を回避するため、
+               デフォルトで表示状態にしておく。Web Componentsが完全にロードされた後、
+               JavaScriptで必要に応じて非表示にするロジックを実装 */
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* JavaScriptで全てがロードされるまで非表示にするためのクラス */
+        body.loading {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        /* Headings */
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 2.8em;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            text-shadow: 0 2px 6px rgba(79, 209, 197, 0.2);
+        }
+
+        .creator-info {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 35px;
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+
+        /* Global Input Elements Style (applied to native elements and inherited by Web Components) */
+        label {
+            display: block;
+            margin-top: 22px;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 1em;
+            letter-spacing: 0.01em;
+        }
+
+        select, input[type="text"], input[type="number"], textarea {
+            width: calc(100% - 30px);
+            padding: 14px 15px;
+            margin-top: 5px;
+            margin-bottom: 22px;
+            background-color: var(--background-lighter);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+            transition: all 0.15s ease-in-out;
+        }
+        select:focus, input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px var(--focus-ring);
+            outline: none;
+            background-color: #4a5568;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #a0aec0;
+        }
+
+        /* Select specific arrow styling */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23a0aec0" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 22px;
+            padding-right: 40px;
+        }
+
+        #prompt_output {
+            width: calc(100% - 30px); /* Web ComponentのShadow DOM外の要素 */
+            height: 300px;
+            resize: vertical;
+            font-family: var(--font-family-monospace);
+            line-height: 1.4;
+            font-size: 0.95em;
+        }
+
+        .graduation-effort-item, .additionalConstraintInput {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+            background-color: #2d3748;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .graduation-effort-item input, .additionalConstraintInput input {
+            flex-grow: 1;
+            margin-right: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            width: auto;
+            background-color: var(--background-dark);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+            padding: 8px 10px;
+        }
+
+        .graduation-effort-item button, .additionalConstraintInput button {
+            margin-top: 0;
+            padding: 7px 14px;
+            font-size: 0.9em;
+            font-weight: normal;
+            background-color: #e53e3e;
+            box-shadow: none;
+            transform: none;
+            border-radius: 3px;
+            color: var(--text-primary); /* Button text color */
+        }
+        .graduation-effort-item button:hover, .additionalConstraintInput button:hover {
+            background-color: #c53030;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(229, 62, 62, 0.2);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            h1 { font-size: 2.6em; }
+        }
+
+        @media (max-width: 992px) {
+            h1 { font-size: 2.4em; }
+            button { padding: 12px 24px; font-size: 1em; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2em; }
+            .creator-info { font-size: 1.0em; margin-bottom: 25px; }
+            select, input[type="text"], input[type="number"], textarea { width: calc(100% - 26px); padding: 10px; font-size: 0.9em; margin-bottom: 18px; }
+            button { padding: 10px 20px; font-size: 0.95em; }
+            #prompt_output { height: 250px; }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.0em; }
+            .creator-info { font-size: 0.9em; margin-bottom: 20px; }
+            select, input[type="text"], input[type="number"], textarea { width: calc(100% - 22px); padding: 8px; font-size: 0.85em; margin-bottom: 15px; }
+            button { padding: 8px 16px; font-size: 0.9em; margin-top: 20px; }
+            #prompt_output { height: 200px; }
+        }
+    </style>
+</head>
+<body class="loading"> <div id="app-root">
+        <h1>PromptFlow <span style="color: var(--secondary-color);">Pro</span></h1>
+        <p class="creator-info">Developed by Nomura</p>
+
+        <prompt-input-section title="基本情報" id="baseInfoSection">
+            <prompt-select label="役割" id="role" options='["教師", "学年主任", "教科主任", "生徒指導担当", "進路指導担当", "特別支援教育担当", "養護教諭", "司書教諭", "ICT支援員", "スクールカウンセラー", "スクールロイヤー", "弁護士", "医者", "プログラマー", "イラストレーター", "校長", "教務主任", "文部科学省職員", "小説家", "脚本家", "翻訳者", "作曲家", "作詞家", "カスタマーサポート", "デザイナー", "その他"]' value="教師"></prompt-select>
+            <text-input label="その他の役割" id="otherRole" data-depends-on="role" data-depends-value="その他" value="" style="display: none;"></text-input>
+
+            <prompt-select label="作業内容" id="task" options='["授業計画作成", "教材作成", "テスト作成", "生徒指導", "保護者対応", "会議資料作成", "研修資料作成", "校内広報誌作成", "学年通信文例作成", "所見文作成", "研究レポート作成", "時間割作成", "予算管理", "イベント企画", "進路相談", "いじめ対応", "不登校対応", "特別支援教育計画", "ICT活用計画", "メール文作成", "単元計画作成", "卒業式式辞例文作成", "教育論文作成", "その他"]' value=""></prompt-select>
+            <text-input label="その他の作業内容" id="otherTask" data-depends-on="task" data-depends-value="その他" value="" style="display: none;"></text-input>
+        </prompt-input-section>
+
+        <prompt-input-section title="詳細設定" id="dynamicFieldsSection">
+            <dynamic-form-group id="gakunen_tsushin_fields" data-task="学年通信文例作成" style="display: none;">
+                <text-input label="主な話題" id="topic" value=""></text-input>
+                <textarea-input label="話題の詳細" id="topic_details" value=""></textarea-input>
+            </dynamic-form-group>
+
+            <dynamic-form-group id="event_details_fields" data-task="イベント企画" style="display: none;">
+                <textarea-input label="イベントの詳細" id="event_details" value=""></textarea-input>
+            </dynamic-form-group>
+
+            <dynamic-form-group id="grade_subject_fields" data-task-group='["教材作成", "授業計画作成", "テスト作成", "所見文作成", "研究レポート作成", "単元計画作成"]' style="display: none;">
+                <prompt-select label="学年" id="grade" options='["小学1年生", "小学2年生", "小学3年生", "小学4年生", "小学5年生", "小学6年生", "中学1年生", "中学2年生", "中学3年生"]' value=""></prompt-select>
+                <prompt-select label="教科" id="subject" options='["国語科", "算数科", "理科", "社会科", "音楽科", "図画工作科", "家庭科", "体育科", "外国語科", "道徳科", "総合的な学習の時間", "プログラミング"]' value=""></prompt-select>
+                <text-input label="単元名" id="unit" value=""></text-input>
+            </dynamic-form-group>
+
+            <dynamic-form-group id="syoken_fields" data-task="所見文作成" style="display: none;">
+                <textarea-input label="評価ポイント" id="evaluation_point" value=""></textarea-input>
+            </dynamic-form-group>
+
+            <dynamic-form-group id="graduation_fields" data-task="卒業式式辞例文作成" style="display: none;">
+                <label for="graduation_efforts">式辞の内容：</label>
+                <div id="graduation_efforts_container">
+                    <div class="graduation-effort-item">
+                        <input type="text" class="graduation_effort" placeholder="例: 3年間の成長の軌跡" value="">
+                        <button type="button" onclick="window.removeGraduationEffort(this)">削除</button>
+                    </div>
+                </div>
+                <button type="button" onclick="window.addGraduationEffort()">式辞の内容を追加</button>
+            </dynamic-form-group>
+
+            <dynamic-form-group id="essay_fields" data-task="教育論文作成" style="display: none;">
+                <text-input label="テーマ" id="essay_theme" value=""></text-input>
+            </dynamic-form-group>
+
+            <dynamic-form-group id="specific_content_fields" data-task-group='["生徒指導", "保護者対応", "会議資料作成", "研修資料作成", "校内広報誌作成", "イベント企画", "進路相談", "いじめ対応", "不登校対応", "特別支援教育計画", "ICT活用計画", "メール文作成"]' style="display: none;">
+                <textarea-input label="具体的な内容" id="specific_content" value=""></textarea-input>
+            </dynamic-form-group>
+        </prompt-input-section>
+
+        <prompt-input-section title="制約と出力" id="constraintsSection">
+            <constraint-selector></constraint-selector>
+            <prompt-select label="出力形式" id="output_format" options='["テキスト", "箇条書き", "表", "HTML", "Markdown", "JSON", "CSV", "TSV", "XML", "YAML", "PDF", "Word文書", "Excelシート", "PowerPointスライド", "イメージファイル", "音声ファイル", "動画ファイル", "プログラムコード", "数式", "フローチャート", "UML", "楽譜", "3Dモデル"]' value=""></prompt-select>
+            <numeric-input label="文字数" id="char_count" value=""></numeric-input>
+            <textarea-input label="# 入力文" id="input_text" placeholder="AIに処理させたい具体的な文章やデータなどをここに入力してください。" value=""></textarea-input>
+        </prompt-input-section>
+
+        <button-component label="プロンプト生成" id="generatePromptButton"></button-component>
+
+        <prompt-input-section title="生成されたプロンプト" id="promptOutputSection">
+            <textarea-input label="生成されたプロンプト" id="prompt_output" readonly value=""></textarea-input>
+            <button-component label="プロンプトをコピー" id="copyPromptButton"></button-component>
+        </prompt-input-section>
+
+        <prompt-input-section title="関連AIツールリンク">
+            <p>以下のリンクをクリック後、**Copilot**ではコピーしたプロンプトが自動で実行されます。</p>
+            <p>その他のAIツールでは、お手数ですが、入力欄に手動でペーストしてください。</p>
+            <link-button url="#" label="Copilot" data-action="open-copilot"></link-button>
+            <link-button url="https://gemini.google.com/" label="Gemini"></link-button>
+            <link-button url="https://www.perplexity.ai/" label="Perplexity"></link-button>
+            <link-button url="https://felo.ai/" label="felo"></link-button>
+            <link-button url="https://gamma.app/" label="Gamma"></link-button>
+            <link-button url="https://chat.openai.com/" label="ChatGPT"></link-button>
+            <link-button url="https://claude.ai/new" label="Claude"></link-button>
+            <link-button url="https://www.canva.com/" label="Canva"></link-button>
+            <link-button url="https://labs.google/fx/ja/tools/image-fx" label="ImageFX"></link-button>
+            <link-button url="https://stableaudio.com/" label="Stable Audio"></link-button>
+            <link-button url="https://runwayml.com/" label="Runway"></link-button>
+            <link-button url="https://designer.microsoft.com/" label="Microsoft Designer"></link-button>
+            <link-button url="https://www.grammarly.com/" label="Grammarly"></link-button>
+            <link-button url="https://www.beautiful.ai/" label="Beautiful.ai"></link-button>
+            <link-button url="https://www.chatpdf.com/" label="ChatPDF"></link-button>
+        </prompt-input-section>
+    </div>
+
+    <script>
+        // === Service Worker の登録 ===
+        // PWAとして機能させるためのService Worker
+        // Data URIとして直接HTMLに埋め込む場合、ブラウザのセキュリティ制約でCORSエラーや登録失敗が起こりやすい。
+        // デプロイ時には、manifest.json と service-worker.js は別ファイルとして提供するのがベストプラクティス。
+        // ここでは単一ファイル要件のため、引き続き埋め込み形式を維持し、発生しうる警告は無視する想定。
+        // 登録失敗してもUIが機能するように、Service Workerの処理をUIのロードから分離。
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Service Workerの内容をbase64でエンコード
+                const serviceWorkerContent = `
+                    self.addEventListener('install', (event) => {
+                        console.log('[Service Worker] Installing...');
+                        event.waitUntil(
+                            caches.open('promptflow-pro-v3').then((cache) => {
+                                console.log('[Service Worker] Caching all content');
+                                // ここにキャッシュしたいリソースのパスを追加
+                                return cache.addAll(['/']); // HTMLファイル自体をキャッシュ
+                            })
+                        );
+                    });
+
+                    self.addEventListener('activate', (event) => {
+                        console.log('[Service Worker] Activating...');
+                        event.waitUntil(
+                            caches.keys().then((cacheNames) => {
+                                return Promise.all(
+                                    cacheNames.map((cacheName) => {
+                                        if (cacheName !== 'promptflow-pro-v3') {
+                                            console.log('[Service Worker] Deleting old cache:', cacheName);
+                                            return caches.delete(cacheName);
+                                        }
+                                    })
+                                );
+                            })
+                        );
+                        return self.clients.claim();
+                    });
+
+                    self.addEventListener('fetch', (event) => {
+                        // manifest.json を Data URI で提供
+                        if (event.request.url.endsWith('/manifest.json')) {
+                            const manifest = {
+                                "name": "PromptFlow Pro",
+                                "short_name": "PromptFlow",
+                                "description": "AI協調作業のための統合プロンプト開発環境",
+                                "start_url": "./",
+                                "display": "standalone",
+                                "background_color": "#1e293b",
+                                "theme_color": "#4fd1c5",
+                                "icons": [
+                                    {
+                                        "src": "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yNDMyL3N2ZyI+PHBhdGggZmlsbD0iIzRmZDFjNSIgZD0iTTEyIDJjNS41MiAwIDEwIDQuNDggMTAgMTBzLTQuNDggMTAtMTAgMTAtMTAtNC40OC0xMC0xMCAxMC0xMCAxMC0xem0tMS41IDcuNWgzaDFsMS45Ny01LjMyLS42MS0uNjItLjEtLjEtLjA2LjA2LTQuMzYgNC4zNmExLjc1MiAx.NzUyIDAgMCAwLS4xOSAyLjc3IDEuNzUyIDEuNzUyIDAgMCAwLTIuNzctLjE5bC0uNTUtLjU1MS4wNi0uMDYHMTcuNTIgMS43NTIgMCAwIDAtLjE5LTIyLjc3IDEuNzUyIDEuNzUyIDAgMCAwLTIuNzctLjE5bC0yLjAyIDIuMDJsLTUuMzItMS45N3oiLz48L3N2Zz4=",
+                                        "sizes": "192x192",
+                                        "type": "image/svg+xml"
+                                    },
+                                    {
+                                        "src": "data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yNDMyL3N2ZyI+PHBhdGggZD0iTTEyIDJjMi41IDAtNS4zNiAyLjgtNS4zNiA2LjU2czQuMSAyLjIgNS4zNiA2LjczLTRuMS00LjI1LTUuMzYtMS43My0uNTIgMi44NyAwIDIuNjkgMS41My0uODEgMCAwLTIuNzQtNS42OSAwLTcuMTIgMi41Ni0uNjcgNy42Ny0xLjAyIDEwLjA4LTEuNDEgMi40MS0uNCA1LjE1LS42OCA3LjE1LS42OEwxMiAyYzUuNTIgMCAxMCA0LjQ4IDEwIDEwcy00LjQ4IDEwLTEwIDEwLTEwLTQuNDgtMTAtMTAgMTAtMTAgMTAtMXptLTEuNSA3LjVoM2gxTDEuOTctNS4zMi0uNjEtLjYyLS4wMS4wMS00LjM2IDQuMzZhMS43NTIgMS43NTIgMCAwIDAtLjE5IDIuNzcgMS43NTIgMS43NTIgMCAwIDAtMi43Ny0uMTlsLS41NS0uNTUxLjA2LS4wN0wxNy41MiAxLjc1MiAwIDAgMC0uMTktMi43NyAxLjc1MiAxLjc1MiAwIDAgMC0yLjc3LS4xOWwtMi4wMiAyLjAybC01LjMyLTEuOTd6Ii8+PC9zdmc+",
+                                        "sizes": "512x512",
+                                        "type": "image/svg+xml"
+                                    }
+                                ]
+                            };
+                            const response = new Response(JSON.stringify(manifest), {
+                                headers: { 'Content-Type': 'application/manifest+json' }
+                            });
+                            event.respondWith(response);
+                            return; // manifest.json の処理で終了
+                        }
+
+                        // その他のリクエストはキャッシュから、またはネットワークから取得
+                        event.respondWith(
+                            caches.match(event.request).then((response) => {
+                                return response || fetch(event.request);
+                            })
+                        );
+                    });
+                `;
+                // Service Workerの登録
+                navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(serviceWorkerContent.replace(/\s+/g, ' ')))
+                    .then(() => console.log('Service Worker registered successfully.'))
+                    .catch(error => console.error('Service Worker registration failed:', error));
+            });
+        }
+
+        // === IndexedDB ヘルパー ===
+        const DB_NAME = 'PromptFlowDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'prompts';
+
+        let db;
+
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
+                    console.log('IndexedDB upgrade or creation complete.');
+                };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log('IndexedDB opened successfully.');
+                    resolve(db);
+                };
+
+                request.onerror = (event) => {
+                    console.error('IndexedDB error:', event.target.errorCode, event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        async function saveData(data) {
+            try {
+                if (!db) await openDatabase();
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.put({ id: 'currentPrompt', data: data }); // 単一の"currentPrompt"エントリとして保存
+                return new Promise((resolve, reject) => {
+                    transaction.oncomplete = () => {
+                        // console.log("State saved to IndexedDB.");
+                        resolve();
+                    };
+                    transaction.onerror = (event) => {
+                        console.error('Save data transaction error:', event.target.error);
+                        reject(event.target.error);
+                    };
+                });
+            } catch (e) {
+                console.error('Error in saveData:', e);
+            }
+        }
+
+        async function loadData() {
+            try {
+                if (!db) await openDatabase();
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get('currentPrompt');
+                return new Promise((resolve, reject) => {
+                    request.onsuccess = () => {
+                        // console.log("State loaded from IndexedDB:", request.result);
+                        resolve(request.result ? request.result.data : null);
+                    };
+                    request.onerror = (event) => {
+                        console.error('Load data request error:', event.target.error);
+                        reject(event.target.error);
+                    };
+                });
+            } catch (e) {
+                console.error('Error in loadData:', e);
+                return null;
+            }
+        }
+
+        // === Web Components 定義 ===
+        // 各コンポーネントは Shadow DOM を持ち、カプセル化されたスタイルとロジックを持つ
+        // グローバルCSSから一部の変数を継承して利用
+
+        const commonInputStyles = `
+            :host { display: block; }
+            label {
+                display: block;
+                margin-top: 22px;
+                margin-bottom: 6px;
+                font-weight: 500;
+                color: var(--text-secondary);
+                font-size: 1em;
+                letter-spacing: 0.01em;
+            }
+            select, input[type="text"], input[type="number"], textarea {
+                width: calc(100% - 30px);
+                padding: 14px 15px;
+                margin-top: 5px;
+                margin-bottom: 22px;
+                background-color: var(--background-dark);
+                color: var(--text-primary);
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                font-size: 1em;
+                box-sizing: border-box;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+                transition: all 0.15s ease-in-out;
+            }
+            select:focus, input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+                border-color: var(--secondary-color);
+                box-shadow: 0 0 0 2px var(--focus-ring);
+                outline: none;
+                background-color: #4a5568;
+            }
+            input::placeholder, textarea::placeholder { color: #a0aec0; }
+        `;
+
+        class PromptInputSection extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const title = this.getAttribute('title');
+                shadow.innerHTML = `
+                    <style>
+                        :host { display: block; }
+                        .container {
+                            border: 1px solid var(--border-color);
+                            padding: 30px;
+                            margin-top: 35px;
+                            border-radius: 6px;
+                            background-color: var(--background-lighter);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                            position: relative;
+                        }
+                        h2 {
+                            color: var(--secondary-color);
+                            margin-top: 0;
+                            margin-bottom: 25px;
+                            border-bottom: 1px dashed var(--border-color);
+                            padding-bottom: 12px;
+                            font-size: 1.8em;
+                            font-weight: 500;
+                            letter-spacing: 0.01em;
+                        }
+                        @media (max-width: 1200px) { .container { padding: 28px; } h2 { font-size: 1.7em; margin-bottom: 22px; padding-bottom: 10px; } }
+                        @media (max-width: 992px) { .container { padding: 25px; margin-top: 30px; } h2 { font-size: 1.6em; margin-bottom: 20px; padding-bottom: 8px; } }
+                        @media (max-width: 768px) { .container { padding: 20px; margin-top: 25px; } h2 { font-size: 1.5em; margin-bottom: 18px; padding-bottom: 6px; } }
+                        @media (max-width: 480px) { .container { padding: 15px; margin-top: 20px; } h2 { font-size: 1.3em; margin-bottom: 15px; padding-bottom: 5px; } }
+                    </style>
+                    <div class="container" part="container">
+                        <h2 part="header">${title}</h2>
+                        <slot></slot>
+                    </div>
+                `;
+                // console.log('PromptInputSection defined and instantiated.'); // Reduced console noise
+            }
+        }
+        // customElements.define はDOM構築後に確実に実行されるように調整
+        if (!customElements.get('prompt-input-section')) {
+            customElements.define('prompt-input-section', PromptInputSection);
+        }
+
+        class PromptSelect extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const labelText = this.getAttribute('label');
+                const optionsJson = JSON.parse(this.getAttribute('options'));
+                const id = this.getAttribute('id');
+                const initialValue = this.getAttribute('value') || ""; // 初期値を空に
+
+                shadow.innerHTML = `
+                    <style>
+                        ${commonInputStyles}
+                        select {
+                            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+                            background-image: url('data:image/svg+xml;utf8,<svg fill="%23a0aec0" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+                            background-repeat: no-repeat; background-position: right 12px center; background-size: 22px;
+                            padding-right: 40px;
+                        }
+                    </style>
+                    <label for="${id}">${labelText}：</label>
+                    <select id="${id}">
+                        <option value="" disabled ${initialValue === "" ? 'selected' : ''}>選択してください</option> ${optionsJson.map(option => `<option value="${option}" ${option === initialValue ? 'selected' : ''}>${option}</option>`).join('')}
+                    </select>
+                `;
+                // console.log('PromptSelect defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                const selectElement = this.shadowRoot.querySelector('select');
+                if (selectElement) {
+                    selectElement.addEventListener('change', () => {
+                        this.dispatchEvent(new CustomEvent('value-change', { detail: selectElement.value, bubbles: true, composed: true }));
+                    });
+                } else {
+                    console.error(`PromptSelect: Select element not found in shadowRoot for ID ${this.id}`);
+                }
+            }
+
+            get value() {
+                const selectElement = this.shadowRoot.querySelector('select');
+                return selectElement ? selectElement.value : '';
+            }
+
+            set value(val) {
+                const selectElement = this.shadowRoot.querySelector('select');
+                if (selectElement) {
+                    selectElement.value = val;
+                } else {
+                    console.warn(`PromptSelect: Attempted to set value for non-existent select element with ID ${this.id}`);
+                }
+            }
+        }
+        if (!customElements.get('prompt-select')) {
+            customElements.define('prompt-select', PromptSelect);
+        }
+
+        class TextInput extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const labelText = this.getAttribute('label');
+                const id = this.getAttribute('id');
+                const placeholder = this.getAttribute('placeholder') || '';
+                const initialValue = this.getAttribute('value') || '';
+
+                shadow.innerHTML = `
+                    <style>
+                        ${commonInputStyles}
+                    </style>
+                    <label for="${id}">${labelText}：</label>
+                    <input type="text" id="${id}" placeholder="${placeholder}" value="${initialValue}">
+                `;
+                // console.log('TextInput defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                const inputElement = this.shadowRoot.querySelector('input');
+                if (inputElement) {
+                    inputElement.addEventListener('input', () => {
+                        this.dispatchEvent(new CustomEvent('value-change', { detail: inputElement.value, bubbles: true, composed: true }));
+                    });
+                } else {
+                    console.error(`TextInput: Input element not found in shadowRoot for ID ${this.id}`);
+                }
+            }
+
+            get value() {
+                const inputElement = this.shadowRoot.querySelector('input');
+                return inputElement ? inputElement.value : '';
+            }
+
+            set value(val) {
+                const inputElement = this.shadowRoot.querySelector('input');
+                if (inputElement) {
+                    inputElement.value = val;
+                } else {
+                    console.warn(`TextInput: Attempted to set value for non-existent input element with ID ${this.id}`);
+                }
+            }
+        }
+        if (!customElements.get('text-input')) {
+            customElements.define('text-input', TextInput);
+        }
+
+        class TextareaInput extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const labelText = this.getAttribute('label');
+                const id = this.getAttribute('id');
+                const placeholder = this.getAttribute('placeholder') || '';
+                const readonly = this.hasAttribute('readonly') ? 'readonly' : '';
+                const initialValue = this.getAttribute('value') || '';
+
+                shadow.innerHTML = `
+                    <style>
+                        ${commonInputStyles}
+                        textarea { resize: vertical; }
+                    </style>
+                    <label for="${id}">${labelText}：</label>
+                    <textarea id="${id}" rows="5" cols="80" placeholder="${placeholder}" ${readonly}>${initialValue}</textarea>
+                `;
+                // console.log('TextareaInput defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                const textareaElement = this.shadowRoot.querySelector('textarea');
+                if (textareaElement) {
+                    textareaElement.addEventListener('input', () => {
+                        this.dispatchEvent(new CustomEvent('value-change', { detail: textareaElement.value, bubbles: true, composed: true }));
+                    });
+                } else {
+                    console.error(`TextareaInput: Textarea element not found in shadowRoot for ID ${this.id}`);
+                }
+            }
+
+            get value() {
+                const textareaElement = this.shadowRoot.querySelector('textarea');
+                return textareaElement ? textareaElement.value : '';
+            }
+
+            set value(val) {
+                const textareaElement = this.shadowRoot.querySelector('textarea');
+                if (textareaElement) {
+                    textareaElement.value = val;
+                } else {
+                    console.warn(`TextareaInput: Attempted to set value for non-existent textarea element with ID ${this.id}`);
+                }
+            }
+        }
+        if (!customElements.get('textarea-input')) {
+            customElements.define('textarea-input', TextareaInput);
+        }
+
+        class NumericInput extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const labelText = this.getAttribute('label');
+                const id = this.getAttribute('id');
+                const min = this.getAttribute('min') || '1';
+                const initialValue = this.getAttribute('value') || ''; // 初期値を空に
+
+                shadow.innerHTML = `
+                    <style>
+                        ${commonInputStyles}
+                        input[type="number"] { text-align: center; }
+                    </style>
+                    <label for="${id}">${labelText}：</label>
+                    <input type="number" id="${id}" min="${min}" value="${initialValue}">
+                `;
+                // console.log('NumericInput defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                const inputElement = this.shadowRoot.querySelector('input');
+                if (inputElement) {
+                    inputElement.addEventListener('input', () => {
+                        this.dispatchEvent(new CustomEvent('value-change', { detail: inputElement.value, bubbles: true, composed: true }));
+                    });
+                } else {
+                    console.error(`NumericInput: Input element not found in shadowRoot for ID ${this.id}`);
+                }
+            }
+
+            get value() {
+                const inputElement = this.shadowRoot.querySelector('input');
+                return inputElement ? inputElement.value : '';
+            }
+
+            set value(val) {
+                const inputElement = this.shadowRoot.querySelector('input');
+                if (inputElement) {
+                    inputElement.value = val;
+                } else {
+                    console.warn(`NumericInput: Attempted to set value for non-existent input element with ID ${this.id}`);
+                }
+            }
+        }
+        if (!customElements.get('numeric-input')) {
+            customElements.define('numeric-input', NumericInput);
+        }
+
+        class ButtonComponent extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const labelText = this.getAttribute('label');
+                const id = this.getAttribute('id');
+
+                shadow.innerHTML = `
+                    <style>
+                        button {
+                            background-color: var(--secondary-color);
+                            color: var(--background-dark);
+                            padding: 14px 28px;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            margin-top: 25px;
+                            font-size: 1.05em;
+                            font-weight: 500;
+                            letter-spacing: 0.02em;
+                            transition: all 0.15s ease-in-out;
+                            box-shadow: 0 2px 5px rgba(79, 209, 197, 0.2);
+                            outline: none;
+                            width: auto;
+                            display: block;
+                            margin-left: auto;
+                            margin-right: auto;
+                        }
+
+                        button:hover {
+                            background-color: #38b2ac;
+                            transform: translateY(-1px) scale(1.005);
+                            box-shadow: 0 3px 7px rgba(79, 209, 197, 0.3);
+                        }
+
+                        button:active {
+                            transform: translateY(0) scale(1);
+                            box-shadow: 0 1px 3px rgba(79, 209, 197, 0.1);
+                        }
+
+                        @media (max-width: 992px) { button { padding: 12px 24px; font-size: 1em; } }
+                        @media (max-width: 768px) { button { padding: 10px 20px; font-size: 0.95em; } }
+                        @media (max-width: 480px) { button { padding: 8px 16px; font-size: 0.9em; margin-top: 20px; } }
+                    </style>
+                    <button id="${id}">${labelText}</button>
+                `;
+                // console.log('ButtonComponent defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                const buttonElement = this.shadowRoot.querySelector('button');
+                if (buttonElement) {
+                    buttonElement.addEventListener('click', () => {
+                        this.dispatchEvent(new CustomEvent('click', { bubbles: true, composed: true }));
+                    });
+                } else {
+                    console.error(`ButtonComponent: Button element not found in shadowRoot for ID ${this.id}`);
+                }
+            }
+        }
+        if (!customElements.get('button-component')) {
+            customElements.define('button-component', ButtonComponent);
+        }
+
+        class LinkButton extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const url = this.getAttribute('url');
+                const label = this.getAttribute('label');
+                const action = this.getAttribute('data-action') || '';
+
+                shadow.innerHTML = `
+                    <style>
+                        a {
+                            color: var(--secondary-color);
+                            margin: 12px 6px;
+                            display: inline-block;
+                            padding: 10px 18px;
+                            background-color: var(--background-lighter);
+                            border-radius: 4px;
+                            text-decoration: none;
+                            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+                            border: 1px solid transparent;
+                        }
+                        a:hover {
+                            background-color: #4a5568;
+                            color: #f0fff4;
+                            border-color: var(--secondary-color);
+                        }
+                        @media (max-width: 768px) { a { display: block; text-align: center; margin: 8px auto; max-width: 90%; font-size: 0.9em; } }
+                        @media (max-width: 480px) { a { font-size: 0.85em; padding: 8px 12px; } }
+                    </style>
+                    <a href="${url}" target="_blank" data-action="${action}">${label}</a>
+                `;
+                // console.log('LinkButton defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                const link = this.shadowRoot.querySelector('a');
+                if (link && link.dataset.action === 'open-copilot') {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.openCopilotWithPrompt(); // グローバル関数を呼び出し
+                    });
+                }
+            }
+        }
+        if (!customElements.get('link-button')) {
+            customElements.define('link-button', LinkButton);
+        }
+
+        class DynamicFormGroup extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                shadow.innerHTML = `
+                    <style>
+                        :host { display: block; }
+                        .container {
+                            border: 1px solid var(--border-color);
+                            padding: 20px;
+                            margin-top: 20px;
+                            border-radius: 4px;
+                            background-color: #2d3748;
+                            box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
+                        }
+                        @media (max-width: 768px) { .container { padding: 15px; margin-top: 15px; } }
+                    </style>
+                    <div class="container">
+                        <slot></slot>
+                    </div>
+                `;
+                // console.log('DynamicFormGroup defined and instantiated.'); // Reduced console noise
+            }
+        }
+        if (!customElements.get('dynamic-form-group')) {
+            customElements.define('dynamic-form-group', DynamicFormGroup);
+        }
+
+        class ConstraintSelector extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                shadow.innerHTML = `
+                    <style>
+                        ${commonInputStyles}
+
+                        .constraint-search-bar { margin-bottom: 15px; position: relative; }
+                        .constraint-search-bar input {
+                            width: calc(100% - 20px); padding: 10px 10px 10px 35px;
+                            background-color: var(--background-dark); border: 1px solid var(--border-color);
+                            border-radius: 4px; color: var(--text-primary); font-size: 1em; box-sizing: border-box;
+                        }
+                        .constraint-search-bar::before {
+                            content: ''; position: absolute; left: 10px; top: 50%; transform: translateY(calc(-50% + 2px));
+                            width: 20px; height: 20px;
+                            background-image: url('data:image/svg+xml;utf8,<svg fill="%23cbd5e0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>');
+                            background-size: contain; background-repeat: no-repeat; opacity: 0.7;
+                        }
+
+                        .selected-constraints-summary {
+                            background-color: #2d3748; border: 1px solid var(--border-color); border-radius: 6px;
+                            padding: 15px; margin-bottom: 25px; box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
+                        }
+                        .selected-constraints-summary p { margin: 0 0 10px 0; color: var(--text-secondary); font-size: 0.95em; font-weight: 500; }
+                        .selected-constraints-summary ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+                        .selected-constraints-summary li {
+                            background-color: var(--secondary-color); color: var(--background-dark);
+                            padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;
+                            display: flex; align-items: center; gap: 5px; cursor: pointer; transition: all 0.15s ease-in-out;
+                        }
+                        .selected-constraints-summary li:hover { background-color: #38b2ac; transform: translateY(-1px); }
+                        .selected-constraints-summary li .remove-tag {
+                            color: var(--background-dark); font-weight: bold; font-size: 1.1em; cursor: pointer;
+                            line-height: 1; margin-left: 3px; opacity: 0.8;
+                        }
+                        .selected-constraints-summary li .remove-tag:hover { opacity: 1; }
+
+                        .constraint-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+                        .constraint-tab-button {
+                            background-color: var(--tab-inactive-bg); color: var(--text-secondary); padding: 10px 20px;
+                            border: 1px solid var(--border-color); border-bottom: none; border-radius: 6px 6px 0 0;
+                            cursor: pointer; font-weight: 500; transition: all 0.2s ease-in-out; white-space: nowrap;
+                        }
+                        .constraint-tab-button.active {
+                            background-color: var(--tab-active-bg); color: var(--secondary-color); border-color: var(--secondary-color);
+                            border-bottom: 1px solid var(--tab-active-bg); transform: translateY(1px); z-index: 1;
+                        }
+                        .constraint-tab-content { display: none; padding-top: 15px; }
+                        .constraint-tab-content.active { display: block; }
+
+                        .constraint-grid {
+                            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding-top: 10px;
+                        }
+                        .constraint-item {
+                            background-color: #2d3748; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s ease-in-out;
+                            display: flex; flex-direction: column; justify-content: space-between; min-height: 90px;
+                            cursor: pointer; position: relative;
+                        }
+                        .constraint-item:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 4px 12px rgba(0,0,0,0.25); background-color: #3a475d; }
+                        .constraint-item.selected {
+                            background-color: var(--card-bg-selected); border-color: var(--card-border-selected);
+                            box-shadow: 0 0 0 3px var(--focus-ring), 0 4px 12px rgba(0,0,0,0.3);
+                        }
+                        .constraint-item-content { display: flex; align-items: flex-start; flex-grow: 1; margin-bottom: 5px; }
+                        .constraint-item input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+                        .constraint-item.selected::after {
+                            content: ''; position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;
+                            background-image: url('data:image/svg+xml;utf8,<svg fill="%234fd1c5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>');
+                            background-size: contain; background-repeat: no-repeat; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); opacity: 0.9;
+                        }
+                        .constraint-item label {
+                            margin-top: 0; font-weight: 400; color: var(--text-secondary); cursor: pointer; flex-grow: 1;
+                            font-size: 0.9em; letter-spacing: 0.005em; white-space: normal; word-break: break-word;
+                            overflow: hidden; text-overflow: ellipsis; line-height: 1.4; padding-right: 25px;
+                        }
+                        .numeric-constraint-group, .text-constraint-group {
+                            display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: auto;
+                            padding-top: 10px; border-top: 1px dashed rgba(71, 85, 105, 0.4);
+                        }
+                        .numeric-constraint-group label, .text-constraint-group label { margin: 0; font-weight: 400; color: var(--text-secondary); white-space: nowrap; font-size: 0.8em; padding-right: 0; }
+                        .numeric-constraint-group input[type="number"], .text-constraint-group input[type="text"] {
+                            width: 60px; padding: 6px 8px; text-align: center; background-color: var(--background-dark);
+                            border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary);
+                            font-size: 0.9em; flex-shrink: 0; margin: 0; box-shadow: none;
+                        }
+                        .text-constraint-group input[type="text"] { width: 100px; }
+                        .additional-constraints-section input { margin-bottom: 10px; }
+                        .additionalConstraintInput {
+                            display: flex; align-items: center; margin-bottom: 12px; gap: 10px;
+                            background-color: #2d3748; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color);
+                        }
+                        .additionalConstraintInput input { flex-grow: 1; margin: 0; padding: 8px 10px; }
+                        .additionalConstraintInput button {
+                            margin-top: 0; padding: 7px 14px; font-size: 0.9em; font-weight: normal;
+                            background-color: #e53e3e; box-shadow: none; transform: none; border-radius: 3px;
+                            color: var(--text-primary);
+                        }
+
+                        @media (max-width: 1200px) { .constraint-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; } .constraint-tab-button { padding: 8px 15px; font-size: 0.95em; } }
+                        @media (max-width: 992px) { .constraint-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; } .constraint-item { padding: 12px; min-height: 80px; } .constraint-item label { font-size: 0.85em; } .numeric-constraint-group input[type="number"] { width: 50px; font-size: 0.8em; } .text-constraint-group input[type="text"] { width: 80px; font-size: 0.8em; } .constraint-tab-button { padding: 7px 12px; font-size: 0.9em; } }
+                        @media (max-width: 768px) {
+                            .constraint-grid { grid-template-columns: 1fr; gap: 10px; }
+                            .constraint-item { min-height: auto; padding: 15px; }
+                            .constraint-item label { font-size: 0.9em; padding-right: 30px; }
+                            .numeric-constraint-group, .text-constraint-group { flex-wrap: wrap; justify-content: flex-start; }
+                            .numeric-constraint-group label, .text-constraint-group label { flex-basis: 100%; margin-bottom: 5px; text-align: left; }
+                            .numeric-constraint-group input[type="number"] { width: 80px; font-size: 0.9em; }
+                            .text-constraint-group input[type="text"] { width: 100px; font-size: 0.9em; }
+                        }
+                        @media (max-width: 480px) { .constraint-item label { font-size: 0.8em; } .numeric-constraint-group input[type="number"] { width: 60px; } .text-constraint-group input[type="text"] { width: 80px; } }
+                    </style>
+                    <label>制約条件：</label><br>
+                    <div class="constraint-search-bar">
+                        <input type="text" id="constraintSearch" placeholder="制約条件を検索...">
+                    </div>
+                    <div class="selected-constraints-summary">
+                        <p>選択中の制約:</p>
+                        <ul id="selectedConstraintsList"></ul>
+                    </div>
+                    <div class="constraint-tabs">
+                        <button class="constraint-tab-button active" data-category="general">一般</button>
+                        <button class="constraint-tab-button" data-category="style">表現/スタイル</button>
+                        <button class="constraint-tab-button" data-category="format">形式</button>
+                        <button class="constraint-tab-button" data-category="advanced">高度な設定</button>
+                        <button class="constraint-tab-button" data-category="custom">カスタム</button>
+                    </div>
+
+                    <div id="tabContent_general" class="constraint-tab-content active">
+                        <div class="constraint-grid">
+                            <div class="constraint-item" data-value="創造性を発揮" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="creative" name="constraints" value="創造性を発揮"><label for="creative">創造性を発揮</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="正確性を重視" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="accuracy" name="constraints" value="正確性を重視"><label for="accuracy">正確性を重視</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="詳細に説明する" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="detailed" name="constraints" value="詳細に説明する"><label for="detailed">詳細に説明する</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="簡潔に説明する" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="concise" name="constraints" value="簡潔に説明する"><label for="concise">簡潔に説明する</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="段階的に説明する" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="step_by_step" name="constraints" value="段階的に説明する"><label for="step_by_step">段階的に説明する</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="具体例を含める" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="example" name="constraints" value="具体例を含める"><label for="example">具体例を含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="たとえ話を用いる" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="analogy" name="constraints" value="たとえ話を用いる"><label for="analogy">たとえ話を用いる</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="質問形式を用いる" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="question" name="constraints" value="質問形式を用いる"><label for="question">質問形式を用いる</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="文頭に教科と単元名を入れる" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="title" name="constraints" value="文頭に教科と単元名を入れる"><label for="title">文頭に教科と単元名を入れる</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="入力文のリンク先を参照する" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="link" name="constraints" value="入力文のリンク先を参照する"><label for="link">入力文のリンク先を参照する</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="添付ファイルの文章表現を参考にする" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="file" name="constraints" value="添付ファイルの文章表現を参考にする"><label for="file">添付ファイルの文章表現を参考にする</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="引用元を入れる" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="quote" name="constraints" value="引用元を入れる"><label for="quote">引用元を入れる</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="客観的な視点" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="objective" name="constraints" value="客観的な視点"><label for="objective">客観的な視点</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="主観的な意見を含める" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="subjective" name="constraints" value="主観的な意見を含める"><label for="subjective">主観的な意見を含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="中立的な立場を保つ" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="neutral" name="constraints" value="中立的な立場を保つ"><label for="neutral">中立的な立場を保つ</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="事実に基づき説明" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="fact_based" name="constraints" value="事実に基づき説明"><label for="fact_based">事実に基づき説明</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="複数の視点から考察" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="multiple_perspectives" name="constraints" value="複数の視点から考察"><label for="multiple_perspectives">複数の視点から考察</label></div>
+                            </div>
+                             <div class="constraint-item" data-value="問題提起と解決策を提示" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="problem_solution" name="constraints" value="問題提起と解決策を提示"><label for="problem_solution">問題提起と解決策を提示</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="要点をまとめて箇条書き" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="summarize_bullet" name="constraints" value="要点をまとめて箇条書き"><label for="summarize_bullet">要点をまとめて箇条書き</label></div>
+                            </div>
+                             <div class="constraint-item" data-value="網羅的に情報提供" data-category="general">
+                                <div class="constraint-item-content"><input type="checkbox" id="comprehensive" name="constraints" value="網羅的に情報提供"><label for="comprehensive">網羅的に情報提供</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tabContent_style" class="constraint-tab-content">
+                        <div class="constraint-grid">
+                            <div class="constraint-item" data-value="ユーモアを交える" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="humor" name="constraints" value="ユーモアを交える"><label for="humor">ユーモアを交える</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="自然な日本語に校正" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="japanese" name="constraints" value="自然な日本語に校正"><label for="japanese">自然な日本語に校正</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="専門用語を用いる" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="technical" name="constraints" value="専門用語を用いる"><label for="technical">専門用語を用いる</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="公用文にする" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="official" name="constraints" value="公用文にする"><label for="official">公用文にする</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="具体的に指示する" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="specific" name="constraints" value="具体的に指示する"><label for="specific">具体的に指示する</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="ニュアンスを含める" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="nuance" name="constraints" value="ニュアンスを含める"><label for="nuance">ニュアンスを含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="物語形式にする" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="story" name="constraints" value="物語形式にする"><label for="story">物語形式にする</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="専門家として回答する" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="expert" name="constraints" value="専門家として回答する"><label for="expert">専門家として回答する</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="友好的なトーン" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="friendly_tone" name="constraints" value="友好的なトーン"><label for="friendly_tone">友好的なトーン</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="フォーマルなトーン" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="formal_tone" name="constraints" value="フォーマルなトーン"><label for="formal_tone">フォーマルなトーン</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="説得力のある文章" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="persuasive_writing" name="constraints" value="説得力のある文章"><label for="persuasive_writing">説得力のある文章</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="詩的な表現" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="poetic_expression" name="constraints" value="詩的な表現"><label for="poetic_expression">詩的な表現</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="簡潔で明瞭な表現" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="clear_concise" name="constraints" value="簡潔で明瞭な表現"><label for="clear_concise">簡潔で明瞭な表現</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="感情豊かな表現" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="emotional_expression" name="constraints" value="感情豊かな表現"><label for="emotional_expression">感情豊かな表現</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="教育的な語り口" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="educational_tone" name="constraints" value="教育的な語り口"><label for="educational_tone">教育的な語り口</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="批判的な分析" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="critical_analysis" name="constraints" value="批判的な分析"><label for="critical_analysis">批判的な分析</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="鼓舞するようなメッセージ" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="inspiring_message" name="constraints" value="鼓舞するようなメッセージ"><label for="inspiring_message">鼓舞するようなメッセージ</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="会話形式で回答" data-category="style">
+                                <div class="constraint-item-content"><input type="checkbox" id="conversational" name="constraints" value="会話形式で回答"><label for="conversational">会話形式で回答</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tabContent_format" class="constraint-tab-content">
+                        <div class="constraint-grid">
+                            <div class="constraint-item" data-value="図やグラフで視覚的に説明" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="visual" name="constraints" value="図やグラフで視覚的に説明"><label for="visual">図やグラフで視覚的に説明</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="箇条書きで分かりやすく" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="bullet_points" name="constraints" value="箇条書きで分かりやすく"><label for="bullet_points">箇条書きで分かりやすく</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="表形式で整理" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="table_format" name="constraints" value="表形式で整理"><label for="table_format">表形式で整理</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="HTML形式でマークアップ" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="html_format" name="constraints" value="HTML形式でマークアップ"><label for="html_format">HTML形式でマークアップ</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="Markdown形式で記述" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="markdown_format" name="constraints" value="Markdown形式で記述"><label for="markdown_format">Markdown形式で記述</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="グラフの種類を指定" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="graph_type" name="constraints" value="グラフの種類を指定"><label for="graph_type">グラフの種類を指定</label></div>
+                                <div class="text-constraint-group" style="display: none;">
+                                    <input type="text" id="graphTypeInput" placeholder="例: 棒グラフ" value="">
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="図解を含める" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="include_diagram" name="constraints" value="図解を含める"><label for="include_diagram">図解を含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="コードブロックで表示" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="code_block" name="constraints" value="コードブロックで表示"><label for="code_block">コードブロックで表示</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="見出しを多用" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="many_headings" name="constraints" value="見出しを多用"><label for="many_headings">見出しを多用</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="キーワードを太字" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="bold_keywords" name="constraints" value="キーワードを太字"><label for="bold_keywords">キーワードを太字</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="専門用語は注釈付き" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="annotate_terms" name="constraints" value="専門用語は注釈付き"><label for="annotate_terms">専門用語は注釈付き</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="英語併記" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="english_parallel" name="constraints" value="英語併記"><label for="english_parallel">英語併記</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="目次を作成" data-category="format">
+                                <div class="constraint-item-content"><input type="checkbox" id="create_toc" name="constraints" value="目次を作成"><label for="create_toc">目次を作成</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tabContent_advanced" class="constraint-tab-content">
+                        <div class="constraint-grid">
+                            <div class="constraint-item" data-value="〇回改善を繰り返す" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="improve" name="constraints" value="〇回改善を繰り返す"><label for="improve">〇回改善を繰り返す</label></div>
+                                <div class="numeric-constraint-group" style="display: none;">
+                                    <input type="number" id="improveCount" min="1" value="">
+                                    <label>回</label>
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="〇才でも分かる言葉で" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="age" name="constraints" value="〇才でも分かる言葉で"><label for="age">〇才でも分かる言葉で</label></div>
+                                <div class="numeric-constraint-group" style="display: none;">
+                                    <input type="number" id="ageCount" min="1" value="">
+                                    <label>才</label>
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="〇文字以内に収める" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="char_limit" name="constraints" value="〇文字以内に収める"><label for="char_limit">〇文字以内に収める</label></div>
+                                <div class="numeric-constraint-group" style="display: none;">
+                                    <input type="number" id="charLimitCount" min="1" value="">
+                                    <label>文字</label>
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="〇段落で構成" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="paragraph_count" name="constraints" value="〇段落で構成"><label for="paragraph_count">〇段落で構成</label></div>
+                                <div class="numeric-constraint-group" style="display: none;">
+                                    <input type="number" id="paragraphCount" min="1" value="">
+                                    <label>段落</label>
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="〇つの選択肢を提示" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="option_count" name="constraints" value="〇つの選択肢を提示"><label for="option_count">〇つの選択肢を提示</label></div>
+                                <div class="numeric-constraint-group" style="display: none;">
+                                    <input type="number" id="optionCount" min="1" value="">
+                                    <label>つ</label>
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="質問への深掘りを含める" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="deep_dive_questions" name="constraints" value="質問への深掘りを含める"><label for="deep_dive_questions">質問への深掘りを含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="メリット・デメリットを列挙" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="pros_cons" name="constraints" value="メリット・デメリットを列挙"><label for="pros_cons">メリット・デメリットを列挙</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="未来予測を含める" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="future_prediction" name="constraints" value="未来予測を含める"><label for="future_prediction">未来予測を含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="論理的思考プロセスを提示" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="logical_process" name="constraints" value="論理的思考プロセスを提示"><label for="logical_process">論理的思考プロセスを提示</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="批判的視点を含める" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="critical_perspective" name="constraints" value="批判的視点を含める"><label for="critical_perspective">批判的視点を含める</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="ロールプレイを指定" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="role_play" name="constraints" value="ロールプレイを指定"><label for="role_play">ロールプレイを指定</label></div>
+                                <div class="text-constraint-group" style="display: none;">
+                                    <input type="text" id="rolePlayInput" placeholder="例: 生徒役" value="">
+                                </div>
+                            </div>
+                            <div class="constraint-item" data-value="時系列で記述" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="chronological_order" name="constraints" value="時系列で記述"><label for="chronological_order">時系列で記述</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="重要度順にソート" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="sort_by_importance" name="constraints" value="重要度順にソート"><label for="sort_by_importance">重要度順にソート</label></div>
+                            </div>
+                            <div class="constraint-item" data-value="優先順位を明確化" data-category="advanced">
+                                <div class="constraint-item-content"><input type="checkbox" id="clarify_priority" name="constraints" value="優先順位を明確化"><label for="clarify_priority">優先順位を明確化</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tabContent_custom" class="constraint-tab-content">
+                        <div class="additional-constraints-section">
+                            <label for="customConstraintInput">カスタム制約の追加:</label>
+                            <input type="text" id="customConstraintInput" placeholder="新しい制約条件を入力">
+                            <button type="button" id="addCustomConstraintButton">カスタム制約を追加</button>
+                            <div id="additionalConstraints" style="margin-top: 15px;">
+                                </div>
+                        </div>
+                    </div>
+                `;
+                // console.log('ConstraintSelector defined and instantiated.'); // Reduced console noise
+            }
+
+            connectedCallback() {
+                this.setupTabListeners();
+                this.setupConstraintItemListeners();
+                this.setupSearchFunctionality();
+                this.setupCustomConstraintAddition();
+                this.updateSelectedConstraintsSummary(); // 起動時に概要を更新
+            }
+
+            setupTabListeners() {
+                this.shadowRoot.querySelectorAll('.constraint-tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        this.shadowRoot.querySelectorAll('.constraint-tab-button').forEach(btn => btn.classList.remove('active'));
+                        this.shadowRoot.querySelectorAll('.constraint-tab-content').forEach(content => content.classList.remove('active'));
+
+                        e.target.classList.add('active');
+                        const category = e.target.dataset.category;
+                        this.shadowRoot.getElementById(`tabContent_${category}`).classList.add('active');
+                        
+                        const searchInput = this.shadowRoot.getElementById('constraintSearch');
+                        if (searchInput) {
+                            searchInput.value = '';
+                            this.filterConstraints();
+                        }
+                    });
+                });
+            }
+
+            setupConstraintItemListeners() {
+                this.shadowRoot.querySelectorAll('.constraint-item').forEach(item => {
+                    item.addEventListener('click', (event) => {
+                        const checkbox = item.querySelector('input[type="checkbox"]');
+                        if (!checkbox) {
+                            console.error('Checkbox not found in constraint-item:', item);
+                            return;
+                        }
+
+                        // クリックされたのが入力フィールド自身でなければチェックボックスの状態を反転
+                        const targetTagName = event.target.tagName.toLowerCase();
+                        if (targetTagName !== 'input' && targetTagName !== 'label') {
+                            checkbox.checked = !checkbox.checked;
+                        } else if (targetTagName === 'input' && (event.target.type === 'number' || event.target.type === 'text')) {
+                            // 数値入力やテキスト入力のクリックはチェックボックスの状態を変更しない
+                            event.stopPropagation();
+                        }
+                       
+                        item.classList.toggle('selected', checkbox.checked);
+
+                        const numericInput = item.querySelector('input[type="number"]');
+                        const textInput = item.querySelector('input[type="text"]');
+
+                        if (numericInput) {
+                            this.toggleInputVisibility(checkbox.checked, numericInput);
+                        } else if (textInput) {
+                            this.toggleInputVisibility(checkbox.checked, textInput);
+                        }
+                        this.updateSelectedConstraintsSummary();
+                        this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+                    });
+
+                    const numericInput = item.querySelector('input[type="number"]');
+                    const textInput = item.querySelector('input[type="text"]');
+                    if (numericInput) {
+                        numericInput.addEventListener('input', () => {
+                            this.updateSelectedConstraintsSummary();
+                            this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+                        });
+                        this.toggleInputVisibility(item.classList.contains('selected'), numericInput);
+                    }
+                    if (textInput) {
+                        textInput.addEventListener('input', () => {
+                            this.updateSelectedConstraintsSummary();
+                            this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+                        });
+                        this.toggleInputVisibility(item.classList.contains('selected'), textInput);
+                    }
+                });
+            }
+
+            toggleInputVisibility(isChecked, inputElement) {
+                const parentGroup = inputElement.closest('.numeric-constraint-group') || inputElement.closest('.text-constraint-group');
+                if (parentGroup) {
+                    parentGroup.style.display = isChecked ? 'flex' : 'none';
+                }
+            }
+
+            setupSearchFunctionality() {
+                const searchInput = this.shadowRoot.getElementById('constraintSearch');
+                if (searchInput) {
+                    searchInput.addEventListener('keyup', () => this.filterConstraints());
+                } else {
+                    console.error('ConstraintSelector: Search input not found.');
+                }
+            }
+
+            filterConstraints() {
+                const searchInput = this.shadowRoot.getElementById('constraintSearch');
+                if (!searchInput) return;
+
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeTabContent = this.shadowRoot.querySelector('.constraint-tab-content.active');
+                
+                if (!activeTabContent) return;
+
+                const constraintItems = activeTabContent.querySelectorAll('.constraint-item');
+                constraintItems.forEach(item => {
+                    const label = item.querySelector('label');
+                    if (label) {
+                        const labelText = label.textContent.toLowerCase();
+                        const shouldShow = labelText.includes(searchTerm);
+                        item.style.display = shouldShow ? 'flex' : 'none';
+                    }
+                });
+            }
+
+            setupCustomConstraintAddition() {
+                const addButton = this.shadowRoot.getElementById('addCustomConstraintButton');
+                const customInput = this.shadowRoot.getElementById('customConstraintInput');
+
+                if (addButton && customInput) {
+                    addButton.addEventListener('click', () => this.addCustomConstraint());
+                    customInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.addCustomConstraint();
+                        }
+                    });
+                } else {
+                    console.error('ConstraintSelector: Custom constraint add button or input not found.');
+                }
+            }
+
+            addCustomConstraint() {
+                const customInput = this.shadowRoot.getElementById("customConstraintInput");
+                if (!customInput) return;
+
+                const customValue = customInput.value.trim();
+                if (customValue === "") {
+                    alert("追加する制約条件を入力してください。");
+                    return;
+                }
+
+                const existingCustomInputs = Array.from(this.shadowRoot.querySelectorAll('#additionalConstraints .additionalConstraint'));
+                const isDuplicate = existingCustomInputs.some(input => input.value.trim() === customValue);
+                
+                if (isDuplicate) {
+                    alert("その制約条件は既に追加されています。");
+                    return;
+                }
+
+                const container = this.shadowRoot.getElementById("additionalConstraints");
+                if (!container) {
+                    console.error('ConstraintSelector: Custom constraints container not found.');
+                    return;
+                }
+
+                const newConstraintWrapper = document.createElement("div");
+                newConstraintWrapper.className = "additionalConstraintInput";
+                
+                const uniqueId = `custom_${Date.now()}`;
+
+                newConstraintWrapper.innerHTML = `
+                    <input type="checkbox" id="${uniqueId}" name="constraints" value="${escapeHTML(customValue)}" checked style="display:none;">
+                    <input type="text" class="additionalConstraint" value="${escapeHTML(customValue)}" readonly>
+                    <button type="button" data-checkbox-id="${uniqueId}">削除</button>
+                `;
+                container.appendChild(newConstraintWrapper);
+                customInput.value = ""; 
+
+                const removeButton = newConstraintWrapper.querySelector('button');
+                if (removeButton) {
+                    removeButton.addEventListener('click', (e) => {
+                        const cbId = e.target.dataset.checkboxId;
+                        const checkbox = this.shadowRoot.getElementById(cbId);
+                        if (checkbox) checkbox.checked = false;
+                        e.target.closest('.additionalConstraintInput')?.remove();
+                        this.updateSelectedConstraintsSummary();
+                        this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+                    });
+                } else {
+                    console.error('ConstraintSelector: Remove button for custom constraint not found.');
+                }
+
+                this.updateSelectedConstraintsSummary();
+                this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+            }
+
+            updateSelectedConstraintsSummary() {
+                const selectedList = this.shadowRoot.getElementById('selectedConstraintsList');
+                if (!selectedList) {
+                    console.error('ConstraintSelector: Selected constraints list not found.');
+                    return;
+                }
+                selectedList.innerHTML = '';
+
+                this.shadowRoot.querySelectorAll('.constraint-grid input[type="checkbox"]:checked, #additionalConstraints input[type="checkbox"]:checked').forEach(checkbox => {
+                    let value = checkbox.value;
+                    let displayValue = value; // Summary tag value
+
+                    // Handle numeric/text associated inputs
+                    if (checkbox.id === 'improve') {
+                        const countInput = this.shadowRoot.getElementById('improveCount');
+                        const count = countInput ? countInput.value : '〇';
+                        displayValue = `${count}回改善を繰り返す`;
+                    } else if (checkbox.id === 'age') {
+                        const countInput = this.shadowRoot.getElementById('ageCount');
+                        const count = countInput ? countInput.value : '〇';
+                        displayValue = `${count}才でも分かる言葉で`;
+                    } else if (checkbox.id === 'char_limit') {
+                        const countInput = this.shadowRoot.getElementById('charLimitCount');
+                        const count = countInput ? countInput.value : '〇';
+                        displayValue = `${count}文字以内に収める`;
+                    } else if (checkbox.id === 'paragraph_count') {
+                        const countInput = this.shadowRoot.getElementById('paragraphCount');
+                        const count = countInput ? countInput.value : '〇';
+                        displayValue = `${count}段落で構成`;
+                    } else if (checkbox.id === 'option_count') {
+                        const countInput = this.shadowRoot.getElementById('optionCount');
+                        const count = countInput ? countInput.value : '〇';
+                        displayValue = `${count}つの選択肢を提示`;
+                    } else if (checkbox.id === 'graph_type') {
+                        const textInput = this.shadowRoot.getElementById('graphTypeInput');
+                        const text = textInput ? textInput.value : '';
+                        displayValue = `グラフの種類を指定 (${text || '未指定'})`;
+                    } else if (checkbox.id === 'role_play') {
+                        const textInput = this.shadowRoot.getElementById('rolePlayInput');
+                        const text = textInput ? textInput.value : '';
+                        displayValue = `ロールプレイを指定 (${text || '未指定'})`;
+                    }
+                    
+                    const isCustom = checkbox.closest('#additionalConstraints') !== null;
+                    this.addTagToSummary(displayValue, checkbox.id, isCustom);
+                });
+            }
+
+            addTagToSummary(text, checkboxId, isCustom = false) {
+                const selectedList = this.shadowRoot.getElementById('selectedConstraintsList');
+                if (!selectedList) return;
+
+                const listItem = document.createElement('li');
+                listItem.textContent = text;
+                
+                const removeTag = document.createElement('span');
+                removeTag.className = 'remove-tag';
+                removeTag.textContent = '×';
+                removeTag.onclick = () => {
+                    const checkbox = this.shadowRoot.getElementById(checkboxId);
+                    if (checkbox) {
+                        checkbox.checked = false;
+                        if (isCustom) {
+                            checkbox.closest('.additionalConstraintInput')?.remove();
+                        } else {
+                            const parentItem = checkbox.closest('.constraint-item');
+                            if (parentItem) {
+                                parentItem.classList.remove('selected');
+                                const numericInput = parentItem.querySelector('input[type="number"]');
+                                const textInput = parentItem.querySelector('input[type="text"]');
+                                if (numericInput) this.toggleInputVisibility(false, numericInput);
+                                if (textInput) this.toggleInputVisibility(false, textInput);
+                            }
+                        }
+                    }
+                    this.updateSelectedConstraintsSummary();
+                    this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+                };
+                listItem.appendChild(removeTag);
+                selectedList.appendChild(listItem);
+            }
+
+            get selectedConstraints() {
+                const constraints = [];
+                this.shadowRoot.querySelectorAll('.constraint-grid input[type="checkbox"]:checked, #additionalConstraints input[type="checkbox"]:checked').forEach(checkbox => {
+                    let value = checkbox.value;
+                    if (checkbox.id === 'improve') {
+                        const countInput = this.shadowRoot.getElementById('improveCount');
+                        const count = countInput ? countInput.value : '〇';
+                        value = `${count}回改善を繰り返す`;
+                    } else if (checkbox.id === 'age') {
+                        const countInput = this.shadowRoot.getElementById('ageCount');
+                        const count = countInput ? countInput.value : '〇';
+                        value = `${count}才でも分かる言葉で`;
+                    } else if (checkbox.id === 'char_limit') {
+                        const countInput = this.shadowRoot.getElementById('charLimitCount');
+                        const count = countInput ? countInput.value : '〇';
+                        value = `${count}文字以内に収める`;
+                    } else if (checkbox.id === 'paragraph_count') {
+                        const countInput = this.shadowRoot.getElementById('paragraphCount');
+                        const count = countInput ? countInput.value : '〇';
+                        value = `${count}段落で構成`;
+                    } else if (checkbox.id === 'option_count') {
+                        const countInput = this.shadowRoot.getElementById('optionCount');
+                        const count = countInput ? countInput.value : '〇';
+                        value = `${count}つの選択肢を提示`;
+                    } else if (checkbox.id === 'graph_type') {
+                        const textInput = this.shadowRoot.getElementById('graphTypeInput');
+                        const text = textInput ? textInput.value : '';
+                        value = `グラフの種類を指定 (${text || '未指定'})`;
+                    } else if (checkbox.id === 'role_play') {
+                        const textInput = this.shadowRoot.getElementById('rolePlayInput');
+                        const text = textInput ? textInput.value : '';
+                        value = `ロールプレイを指定 (${text || '未指定'})`;
+                    }
+                    constraints.push(value);
+                });
+                return constraints;
+            }
+
+            set selectedConstraints(constraintsArray) {
+                // Reset all checkboxes and custom constraints
+                this.shadowRoot.querySelectorAll('.constraint-grid input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    const item = cb.closest('.constraint-item');
+                    if (item) item.classList.remove('selected');
+                    const numInput = item.querySelector('input[type="number"]');
+                    const textInput = item.querySelector('input[type="text"]');
+                    if (numInput) { numInput.value = ''; this.toggleInputVisibility(false, numInput); } // 数値入力も空にする
+                    if (textInput) { textInput.value = ''; this.toggleInputVisibility(false, textInput); } // テキスト入力も空にする
+                });
+                const additionalConstraintsContainer = this.shadowRoot.getElementById('additionalConstraints');
+                if (additionalConstraintsContainer) {
+                    additionalConstraintsContainer.innerHTML = '';
+                }
+
+                constraintsArray.forEach(constraintText => {
+                    let found = false;
+                    this.shadowRoot.querySelectorAll('.constraint-grid input[type="checkbox"]').forEach(checkbox => {
+                        let baseValue = checkbox.value;
+                        let associatedInput;
+
+                        if (checkbox.id === 'improve') {
+                            associatedInput = this.shadowRoot.getElementById('improveCount');
+                            baseValue = `〇回改善を繰り返す`;
+                        } else if (checkbox.id === 'age') {
+                            associatedInput = this.shadowRoot.getElementById('ageCount');
+                            baseValue = `〇才でも分かる言葉で`;
+                        } else if (checkbox.id === 'char_limit') {
+                            associatedInput = this.shadowRoot.getElementById('charLimitCount');
+                            baseValue = `〇文字以内に収める`;
+                        } else if (checkbox.id === 'paragraph_count') {
+                            associatedInput = this.shadowRoot.getElementById('paragraphCount');
+                            baseValue = `〇段落で構成`;
+                        } else if (checkbox.id === 'option_count') {
+                            associatedInput = this.shadowRoot.getElementById('optionCount');
+                            baseValue = `〇つの選択肢を提示`;
+                        } else if (checkbox.id === 'graph_type') {
+                            associatedInput = this.shadowRoot.getElementById('graphTypeInput');
+                            baseValue = `グラフの種類を指定`;
+                        } else if (checkbox.id === 'role_play') {
+                            associatedInput = this.shadowRoot.getElementById('rolePlayInput');
+                            baseValue = `ロールプレイを指定`;
+                        }
+
+                        if (constraintText.includes(baseValue)) {
+                            checkbox.checked = true;
+                            const item = checkbox.closest('.constraint-item');
+                            if (item) item.classList.add('selected');
+
+                            if (associatedInput) {
+                                const match = constraintText.match(/\(([^)]+)\)|(\d+)/); // Extracts value in parentheses or a number
+                                if (match) {
+                                    const extractedValue = match[1] || match[2];
+                                    associatedInput.value = extractedValue;
+                                }
+                                this.toggleInputVisibility(true, associatedInput);
+                            }
+                            found = true;
+                            return;
+                        }
+                    });
+
+                    if (!found) {
+                        // Add as a custom constraint
+                        const container = this.shadowRoot.getElementById("additionalConstraints");
+                        if (!container) {
+                            console.error('ConstraintSelector: Custom constraints container not found for setting.');
+                            return;
+                        }
+                        const newConstraintWrapper = document.createElement("div");
+                        newConstraintWrapper.className = "additionalConstraintInput";
+                        const uniqueId = `custom_${Date.now()}`;
+                        newConstraintWrapper.innerHTML = `
+                            <input type="checkbox" id="${uniqueId}" name="constraints" value="${escapeHTML(constraintText)}" checked style="display:none;">
+                            <input type="text" class="additionalConstraint" value="${escapeHTML(constraintText)}" readonly>
+                            <button type="button" data-checkbox-id="${uniqueId}">削除</button>
+                        `;
+                        container.appendChild(newConstraintWrapper);
+                        const removeButton = newConstraintWrapper.querySelector('button');
+                        if (removeButton) {
+                            removeButton.addEventListener('click', (e) => {
+                                const cbId = e.target.dataset.checkboxId;
+                                const checkbox = this.shadowRoot.getElementById(cbId);
+                                if (checkbox) checkbox.checked = false;
+                                e.target.closest('.additionalConstraintInput')?.remove();
+                                this.updateSelectedConstraintsSummary();
+                                this.dispatchEvent(new CustomEvent('constraints-changed', { detail: this.selectedConstraints, bubbles: true, composed: true }));
+                            });
+                        }
+                    }
+                });
+                this.updateSelectedConstraintsSummary();
+            }
+        }
+        if (!customElements.get('constraint-selector')) {
+            customElements.define('constraint-selector', ConstraintSelector);
+        }
+
+        // === グローバルアプリケーションロジック ===
+
+        // DOMContentLoaded後に初期化処理を実行
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOMContentLoaded fired. Starting app initialization.');
+            document.body.classList.add('loading'); // 全体表示前にbodyを非表示にする
+
+            await openDatabase(); // IndexedDBを開く
+
+            // 各Web Componentの参照を確実に取得
+            const getComponent = (selector, fallback = null) => {
+                const component = document.querySelector(selector);
+                if (!component) {
+                    console.error(`Component not found: ${selector}. UI may be incomplete.`);
+                    return fallback;
+                }
+                return component;
+            };
+
+            const roleSelect = getComponent('prompt-select#role');
+            const otherRoleInput = getComponent('text-input#otherRole');
+            const taskSelect = getComponent('prompt-select#task');
+            const otherTaskInput = getComponent('text-input#otherTask');
+            const promptOutputTextarea = getComponent('textarea-input#prompt_output');
+            const generateButton = getComponent('button-component#generatePromptButton');
+            const copyButton = getComponent('button-component#copyPromptButton');
+            const constraintSelector = getComponent('constraint-selector');
+            const topicInput = getComponent('text-input#topic');
+            const topicDetailsInput = getComponent('textarea-input#topic_details');
+            const eventDetailsInput = getComponent('text-input#event_details'); // Changed to text-input
+            const gradeSelect = getComponent('prompt-select#grade');
+            const subjectSelect = getComponent('prompt-select#subject');
+            const unitInput = getComponent('text-input#unit');
+            const evaluationPointInput = getComponent('textarea-input#evaluation_point');
+            const essayThemeInput = getComponent('text-input#essay_theme');
+            const specificContentInput = getComponent('textarea-input#specific_content');
+            const outputFormatSelect = getComponent('prompt-select#output_format');
+            const charCountInput = getComponent('numeric-input#char_count');
+            const inputTextarea = getComponent('textarea-input#input_text');
+            const graduationEffortsContainer = document.getElementById("graduation_efforts_container");
+
+
+            if (!roleSelect || !taskSelect || !promptOutputTextarea || !generateButton || !copyButton || !constraintSelector) {
+                console.error('Critical Web Components not found. UI may be incomplete.');
+                // Critical components missing, display fallback message or ensure basic visibility
+                document.body.classList.remove('loading');
+                return; // Stop further initialization
+            }
+
+            // --- UI状態のロードと復元 ---
+            try {
+                const savedState = await loadData();
+                if (savedState) {
+                    // 役割はユーザーの希望によりロードしない（常に初期値「教師」）
+                    // if (savedState.role) roleSelect.value = savedState.role; // This line is now effectively skipped for loading
+                    if (savedState.otherRole) otherRoleInput.value = savedState.otherRole;
+                    if (savedState.task) taskSelect.value = savedState.task;
+                    if (savedState.otherTask) otherTaskInput.value = savedState.otherTask;
+                    if (topicInput) topicInput.value = savedState.topic || "";
+                    if (topicDetailsInput) topicDetailsInput.value = savedState.topicDetails || "";
+                    if (eventDetailsInput) eventDetailsInput.value = savedState.eventDetails || "";
+                    if (gradeSelect) gradeSelect.value = savedState.grade || "";
+                    if (subjectSelect) subjectSelect.value = savedState.subject || "";
+                    if (unitInput) unitInput.value = savedState.unit || "";
+                    if (evaluationPointInput) evaluationPointInput.value = savedState.evaluationPoint || "";
+                    if (essayThemeInput) essayThemeInput.value = savedState.essayTheme || "";
+                    if (specificContentInput) specificContentInput.value = savedState.specificContent || "";
+                    
+                    if (graduationEffortsContainer && savedState.graduationEfforts && savedState.graduationEfforts.length > 0) {
+                        graduationEffortsContainer.innerHTML = ''; // Clear existing
+                        savedState.graduationEfforts.forEach(effort => {
+                            const newEffortItem = document.createElement("div");
+                            newEffortItem.className = "graduation-effort-item";
+                            newEffortItem.innerHTML = `<input type="text" class="graduation_effort" value="${escapeHTML(effort)}"> <button type="button" onclick="window.removeGraduationEffort(this)">削除</button>`;
+                            graduationEffortsContainer.appendChild(newEffortItem);
+                        });
+                    } else if (graduationEffortsContainer) { // Ensure at least one input field is present if no saved data
+                        graduationEffortsContainer.innerHTML = `
+                            <div class="graduation-effort-item">
+                                <input type="text" class="graduation_effort" placeholder="例: 3年間の成長の軌跡" value="">
+                                <button type="button" onclick="window.removeGraduationEffort(this)">削除</button>
+                            </div>
+                        `;
+                    }
+
+                    // 以前の変更: savedState.selectedConstraints がない場合にデフォルトを設定
+                    // 今回の変更: savedState.selectedConstraints があっても、それをロードするのみ。
+                    // savedState.selectedConstraints がない場合は空の配列で初期化される。
+                    if (constraintSelector) {
+                        constraintSelector.selectedConstraints = savedState.selectedConstraints || [];
+                    }
+
+                    if (outputFormatSelect) outputFormatSelect.value = savedState.outputFormat || "";
+                    if (charCountInput) charCountInput.value = savedState.charCount || "";
+                    if (inputTextarea) inputTextarea.value = savedState.inputText || "";
+                    if (promptOutputTextarea) promptOutputTextarea.value = savedState.generatedPrompt || "";
+
+                } else {
+                    console.log("No saved state found. Initializing UI to default values and setting default constraints.");
+                    resetUI(); // デフォルトUIにリセット
+                    if (constraintSelector) {
+                        // 初期値として「正確性を重視」「公用文にする」「自然な日本語に校正」を設定
+                        constraintSelector.selectedConstraints = ["正確性を重視", "公用文にする", "自然な日本語に校正"];
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load state from IndexedDB or apply to UI:", e);
+                resetUI(); // エラー発生時はデフォルト状態に戻す
+                if (constraintSelector) {
+                    // エラー時もデフォルトの制約条件を設定
+                    constraintSelector.selectedConstraints = ["正確性を重視", "公用文にする", "自然な日本語に校正"];
+                }
+            } finally {
+                // ロード後に依存関係を再評価して表示を更新
+                // taskSelect.value が空の場合、updateDynamicFields は全て非表示にするはず
+                if (taskSelect) {
+                    updateDynamicFields(taskSelect.value);
+                }
+                
+                // data-depends-on を持つ要素の初期表示制御
+                document.querySelectorAll('[data-depends-on]').forEach(element => {
+                    const dependsOnId = element.dataset.dependsOn;
+                    const dependsOnElement = document.getElementById(dependsOnId);
+                    if (dependsOnElement) {
+                        const dependsOnValue = element.dataset.dependsValue;
+                        element.style.display = dependsOnElement.value === dependsOnValue ? "block" : "none";
+                    }
+                });
+
+                // 全ての初期化が完了したらbodyのローディングクラスを削除して表示
+                document.body.classList.remove('loading');
+                console.log('App initialization complete. UI is now visible.');
+            }
+
+
+            // --- イベントリスナー登録 ---
+            roleSelect.addEventListener("value-change", (e) => {
+                const dependsOnTarget = otherRoleInput;
+                if (dependsOnTarget) {
+                    const dependsOnValue = dependsOnTarget.dataset.dependsValue;
+                    dependsOnTarget.style.display = e.detail === dependsOnValue ? "block" : "none";
+                }
+                saveCurrentState();
+            });
+
+            taskSelect.addEventListener("value-change", (e) => {
+                const dependsOnTarget = otherTaskInput;
+                if (dependsOnTarget) {
+                    const dependsOnValue = dependsOnTarget.dataset.dependsValue;
+                    dependsOnTarget.style.display = e.detail === dependsOnValue ? "block" : "none";
+                }
+                updateDynamicFields(e.detail);
+                saveCurrentState();
+            });
+
+            document.querySelectorAll('text-input, textarea-input, numeric-input, prompt-select').forEach(input => {
+                input.addEventListener('value-change', saveCurrentState);
+            });
+            constraintSelector.addEventListener('constraints-changed', saveCurrentState);
+            
+            if (graduationEffortsContainer) {
+                graduationEffortsContainer.addEventListener('input', saveCurrentState);
+                graduationEffortsContainer.addEventListener('change', saveCurrentState);
+            }
+
+            if (generateButton) {
+                generateButton.addEventListener('click', generatePrompt);
+            }
+            if (copyButton) {
+                copyButton.addEventListener('click', copyPrompt);
+            }
+
+            // --- ヘルパー関数 ---
+            function updateDynamicFields(currentTask) {
+                document.querySelectorAll('dynamic-form-group').forEach(group => {
+                    const tasksAttr = group.dataset.taskGroup;
+                    const singleTaskAttr = group.dataset.task;
+
+                    if (tasksAttr) {
+                        try {
+                            const tasks = JSON.parse(tasksAttr);
+                            group.style.display = tasks.includes(currentTask) ? "block" : "none";
+                        } catch (e) {
+                            console.error("Error parsing data-task-group JSON for", group.id, ":", e);
+                            group.style.display = "none";
+                        }
+                    } else if (singleTaskAttr) {
+                        group.style.display = singleTaskAttr === currentTask ? "block" : "none";
+                    } else {
+                        group.style.display = "none";
+                    }
+                });
+            }
+
+            window.addGraduationEffort = function() {
+                const container = document.getElementById("graduation_efforts_container");
+                if (!container) {
+                    console.error('addGraduationEffort: Container not found.');
+                    return;
+                }
+                const newEffortItem = document.createElement("div");
+                newEffortItem.className = "graduation-effort-item";
+                newEffortItem.innerHTML = '<input type="text" class="graduation_effort" placeholder="例: 3年間の成長の軌跡" value=""> <button type="button" onclick="window.removeGraduationEffort(this)">削除</button>';
+                container.appendChild(newEffortItem);
+                saveCurrentState();
+            };
+
+            window.removeGraduationEffort = function(element) {
+                if (element && element.parentElement) {
+                    element.parentElement.remove();
+                    saveCurrentState();
+                } else {
+                    console.error('removeGraduationEffort: Element or parent not found.');
+                }
+            };
+
+            function getCurrentState() {
+                const state = {
+                    role: roleSelect ? roleSelect.value : "",
+                    otherRole: (roleSelect && roleSelect.value === "その他" && otherRoleInput) ? otherRoleInput.value : "",
+                    task: taskSelect ? taskSelect.value : "",
+                    otherTask: (taskSelect && taskSelect.value === "その他" && otherTaskInput) ? otherTaskInput.value : "",
+                    topic: topicInput ? topicInput.value : "",
+                    topicDetails: topicDetailsInput ? topicDetailsInput.value : "",
+                    eventDetails: eventDetailsInput ? eventDetailsInput.value : "",
+                    grade: gradeSelect ? gradeSelect.value : "",
+                    subject: subjectSelect ? subjectSelect.value : "",
+                    unit: unitInput ? unitInput.value : "",
+                    evaluationPoint: evaluationPointInput ? evaluationPointInput.value : "",
+                    essayTheme: essayThemeInput ? essayThemeInput.value : "",
+                    specificContent: specificContentInput ? specificContentInput.value : "",
+                    graduationEfforts: graduationEffortsContainer ? Array.from(graduationEffortsContainer.querySelectorAll('.graduation_effort')).map(el => el.value).filter(el => el) : [],
+                    selectedConstraints: constraintSelector ? constraintSelector.selectedConstraints : [],
+                    outputFormat: outputFormatSelect ? outputFormatSelect.value : "",
+                    charCount: charCountInput ? charCountInput.value : "",
+                    inputText: inputTextarea ? inputTextarea.value : "",
+                    generatedPrompt: promptOutputTextarea ? promptOutputTextarea.value : "",
+                };
+                return state;
+            }
+
+            let saveTimer;
+            async function saveCurrentState() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(async () => {
+                    const state = getCurrentState();
+                    await saveData(state);
+                }, 500);
+            }
+
+            function resetUI() {
+                if (roleSelect) roleSelect.value = "教師";
+                if (otherRoleInput) { otherRoleInput.value = ""; otherRoleInput.style.display = "none"; }
+                if (taskSelect) taskSelect.value = ""; // Modified: Set default task to empty
+                if (otherTaskInput) { otherTaskInput.value = ""; otherTaskInput.style.display = "none"; }
+
+                if (taskSelect) updateDynamicFields(taskSelect.value);
+                if (topicInput) topicInput.value = "";
+                if (topicDetailsInput) topicDetailsInput.value = "";
+                if (eventDetailsInput) eventDetailsInput.value = "";
+                if (gradeSelect) gradeSelect.value = "";
+                if (subjectSelect) subjectSelect.value = "";
+                if (unitInput) unitInput.value = "";
+                if (evaluationPointInput) evaluationPointInput.value = "";
+                if (essayThemeInput) essayThemeInput.value = "";
+                if (specificContentInput) specificContentInput.value = "";
+                if (graduationEffortsContainer) {
+                    graduationEffortsContainer.innerHTML = `
+                        <div class="graduation-effort-item">
+                            <input type="text" class="graduation_effort" placeholder="例: 3年間の成長の軌跡" value="">
+                            <button type="button" onclick="window.removeGraduationEffort(this)">削除</button>
+                        </div>
+                    `;
+                }
+
+                // 制約条件の初期化は、初回ロード時のデフォルト設定に任せるため、ここでは行わない
+                // if (constraintSelector) constraintSelector.selectedConstraints = [];
+
+                if (outputFormatSelect) outputFormatSelect.value = "";
+                if (charCountInput) charCountInput.value = "";
+                if (inputTextarea) inputTextarea.value = ""; // 入力文を空欄に設定
+                // カスタム制約条件はconstraintSelectorの初期化で処理されるため、ここでの明示的なクリアは不要
+                // ただし、追加されたカスタム要素を確実に消すために、以下のように追加することも可能
+                const additionalConstraintsContainer = constraintSelector.shadowRoot.getElementById('additionalConstraints');
+                if (additionalConstraintsContainer) {
+                    additionalConstraintsContainer.innerHTML = '';
+                }
+
+                if (promptOutputTextarea) promptOutputTextarea.value = "";
+
+                document.querySelectorAll('dynamic-form-group').forEach(group => group.style.display = 'none');
+                if (taskSelect) updateDynamicFields(taskSelect.value);
+            }
+
+        }); // DOMContentLoaded end
+
+        // グローバル関数（Web Componentsの外からアクセスされるため）
+        function generatePrompt() {
+            const getComponentValue = (selector) => {
+                const comp = document.querySelector(selector);
+                return comp ? comp.value : '';
+            };
+            const getComponentDisplay = (selector) => {
+                const comp = document.querySelector(selector);
+                return comp ? comp.style.display : 'none';
+            };
+
+            const role = getComponentValue('prompt-select#role');
+            const otherRole = getComponentValue('text-input#otherRole');
+            const finalRole = (role === "その他" && getComponentDisplay('text-input#otherRole') === "block") ? otherRole : role;
+
+            const task = getComponentValue('prompt-select#task');
+            const otherTask = getComponentValue('text-input#otherTask');
+            const finalTask = (task === "その他" && getComponentDisplay('text-input#otherTask') === "block") ? otherTask : task;
+
+            let prompt = `# 命令文：\nあなたはプロの${finalRole}です。以下の条件に従って最高の結果を出力してください。\n`;
+            
+            if (finalTask) { // 作業内容が空でない場合のみ追加
+                prompt += `# 作業内容：\n・${finalTask}\n`;
+            }
+
+            const addFieldIfVisible = (selector, prefix = "", suffix = "") => {
+                const element = document.querySelector(selector);
+                if (!element) return;
+
+                // Check if the element is part of a visible dynamic-form-group
+                const dynamicGroup = element.closest('dynamic-form-group');
+                const isDynamicGroupVisible = dynamicGroup && dynamicGroup.style.display === 'block';
+
+                // Check if the element is not inside a dynamic-form-group OR its dynamic-form-group is visible
+                // And ensure it has a value
+                if (element.value && (!dynamicGroup || isDynamicGroupVisible)) {
+                    prompt += `${prefix}${element.value}${suffix}\n`;
+                }
+            };
+            
+            if (task === "学年通信文例作成") {
+                addFieldIfVisible('text-input#topic', '# 主な話題：\n・');
+                addFieldIfVisible('textarea-input#topic_details', '# 話題の詳細：\n・');
+            }
+
+            if (task === "イベント企画") {
+                addFieldIfVisible('text-input#event_details', '# イベントの詳細：\n・');
+            }
+
+            if (["教材作成", "授業計画作成", "テスト作成", "所見文作成", "研究レポート作成", "単元計画作成"].includes(task)) {
+                addFieldIfVisible('prompt-select#grade', '# 学年：\n・');
+                addFieldIfVisible('prompt-select#subject', '# 教科：\n・');
+                addFieldIfVisible('text-input#unit', '# 単元名：\n・');
+            }
+
+            if (task === "所見文作成") {
+                addFieldIfVisible('textarea-input#evaluation_point', '# 評価ポイント:\n・');
+            }
+
+            if (task === "卒業式式辞例文作成") {
+                const graduationEffortsContainer = document.getElementById("graduation_fields");
+                if (graduationEffortsContainer && graduationEffortsContainer.style.display === 'block') {
+                    const graduationEfforts = Array.from(document.querySelectorAll('#graduation_efforts_container .graduation_effort')).map(el => el.value).filter(el => el);
+                    if (graduationEfforts.length > 0) {
+                        prompt += `# 式辞の内容：\n`;
+                        graduationEfforts.forEach(effort => prompt += `・${effort}\n`);
+                    }
+                }
+            }
+
+            if (task === "教育論文作成") {
+                addFieldIfVisible('text-input#essay_theme', '# テーマ：\n・');
+            }
+
+            if (["生徒指導", "保護者対応", "会議資料作成", "研修資料作成", "校内広報誌作成", "イベント企画", "進路相談", "いじめ対応", "不登校対応", "特別支援教育計画", "ICT活用計画", "メール文作成"].includes(task)) {
+                addFieldIfVisible('textarea-input#specific_content', '# 具体的な内容：\n・');
+            }
+
+            const constraintSelector = document.querySelector('constraint-selector');
+            const allConstraints = constraintSelector ? constraintSelector.selectedConstraints : [];
+
+            if (allConstraints.length > 0) {
+                prompt += `# 制約条件：\n`;
+                allConstraints.forEach(constraint => prompt += `・${constraint}\n`);
+            }
+
+            const outputFormat = getComponentValue('prompt-select#output_format');
+            if (outputFormat) {
+                prompt += `# 出力形式：\n・${outputFormat}\n`;
+            }
+            const inputText = getComponentValue('textarea-input#input_text');
+            if (inputText) {
+                prompt += `# 入力文：\n・${inputText}\n`;
+            }
+            const charCount = getComponentValue('numeric-input#char_count');
+            
+            // 文字数は制約条件でも指定されるため、重複を避けるために条件付きで追加
+            const includesCharLimitConstraint = allConstraints.some(c => c.includes('文字以内に収める'));
+            if (charCount && !includesCharLimitConstraint) {
+                prompt += `# 文字数：\n・${charCount}文字`;
+            } else if (charCount && includesCharLimitConstraint) {
+                // 文字数が制約条件に含まれる場合でも、ユーザーが入力した文字数を反映させる
+                // これはAIの解釈に委ねられるが、明示的に含めることでユーザーの意図を強調
+                prompt += `\n# 追加指示：\n・文字数：${charCount}文字`;
+            }
+            
+            prompt = prompt.trim();
+
+            const promptOutputTextarea = document.querySelector('textarea-input#prompt_output');
+            if (promptOutputTextarea) {
+                promptOutputTextarea.value = prompt;
+            } else {
+                console.error('generatePrompt: prompt_output textarea not found.');
+            }
+
+            saveData(getCurrentState());
+        }
+
+        function copyPrompt() {
+            const promptOutputTextarea = document.querySelector('textarea-input#prompt_output');
+            if (!promptOutputTextarea) {
+                console.error('copyPrompt: prompt_output textarea not found.');
+                alert("コピーするプロンプトがありません。");
+                return;
+            }
+
+            const promptText = promptOutputTextarea.value;
+            navigator.clipboard.writeText(promptText)
+                .then(() => {
+                    alert("プロンプトがコピーされました！");
+                })
+                .catch(err => {
+                    console.error('Failed to copy prompt: ', err);
+                    alert("プロンプトのコピーに失敗しました。お使いのブラウザがクリップボードAPIに対応しているか、またはセキュリティ設定をご確認ください。");
+                });
+        }
+
+        window.openCopilotWithPrompt = function() {
+            const promptOutputTextarea = document.querySelector('textarea-input#prompt_output');
+            const promptText = promptOutputTextarea ? promptOutputTextarea.value : '';
+            if (!promptText) {
+                alert("生成されたプロンプトがありません。先にプロンプトを生成してください。");
+                return;
+            }
+            const copilotUrl = `https://copilot.microsoft.com/?q=${encodeURIComponent(promptText)}`;
+            window.open(copilotUrl, '_blank');
+        }
+        
+        function escapeHTML(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+    </script>
+</body>
+</html>
