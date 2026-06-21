@@ -857,18 +857,18 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
         <span class="panel-badge badge-live" id="center-badge">● 取得中</span>
       </div>
       <div class="alert-tab-bar">
-        <button class="atab active" data-atab="warn" onclick="switchAtab('warn')">⚠️ 警報・注意報 <span class="atab-count zero" id="cnt-warn">0</span></button>
-        <button class="atab" data-atab="quake" onclick="switchAtab('quake')">🌍 地震 <span class="atab-count zero" id="cnt-quake">0</span></button>
+        <button class="atab" data-atab="warn" onclick="switchAtab('warn')" style="display:none">⚠️ 警報・注意報 <span class="atab-count zero" id="cnt-warn">0</span></button>
+        <button class="atab active" data-atab="quake" onclick="switchAtab('quake')">🌍 地震 <span class="atab-count zero" id="cnt-quake">0</span></button>
         <button class="atab" data-atab="tsunami" onclick="switchAtab('tsunami')">🌊 津波 <span class="atab-count zero" id="cnt-tsunami">0</span></button>
         <button class="atab" data-atab="typhoon" onclick="switchAtab('typhoon')">🌀 台風 <span class="atab-count zero" id="cnt-typhoon">0</span></button>
         <button class="atab" data-atab="volcano" onclick="switchAtab('volcano')">🌋 火山 <span class="atab-count zero" id="cnt-volcano">0</span></button>
       </div>
-      <div class="atab-content active" id="atab-warn">
+      <div class="atab-content" id="atab-warn" style="display:none">
         <div class="atab-body" id="warn-body">
           <div class="alert-tag safe"><span class="alert-tag-icon">⏳</span>気象庁データを取得中...</div>
         </div>
       </div>
-      <div class="atab-content" id="atab-quake">
+      <div class="atab-content active" id="atab-quake">
         <div class="atab-body" id="quake-body">
           <div class="alert-tag safe"><span class="alert-tag-icon">⏳</span>地震情報を取得中...</div>
         </div>
@@ -1310,11 +1310,10 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
             <div><span>設定を開く</span><span class="kbd">,</span></div>
             <div><span>印刷</span><span class="kbd">Ctrl</span><span class="kbd">P</span></div>
             <div><span>すべて閉じる</span><span class="kbd">Esc</span></div>
-            <div><span>警報タブ</span><span class="kbd">1</span></div>
-            <div><span>地震タブ</span><span class="kbd">2</span></div>
-            <div><span>津波タブ</span><span class="kbd">3</span></div>
-            <div><span>台風タブ</span><span class="kbd">4</span></div>
-            <div><span>火山タブ</span><span class="kbd">5</span></div>
+            <div><span>地震タブ</span><span class="kbd">1</span></div>
+            <div><span>津波タブ</span><span class="kbd">2</span></div>
+            <div><span>台風タブ</span><span class="kbd">3</span></div>
+            <div><span>火山タブ</span><span class="kbd">4</span></div>
           </div>
         </div>
         <div class="m-section">
@@ -1952,6 +1951,14 @@ function drawHistoryChart(hourly){
 ════════════════════════════════════════════ */
 const JMA_LEVEL_DANGER=["大雨警報","洪水警報","暴風警報","大雪警報","暴風雪警報","波浪警報","土砂災害警戒情報","記録的短時間大雨情報","大雨特別警報","暴風特別警報","暴風雪特別警報","大雪特別警報","波浪特別警報","高潮警報","高潮特別警報","氾濫警報","土砂災害警報","土砂災害危険警報","高潮危険警報","大雨浸水危険警報","大雨土砂危険警報","暴風危険警報","波浪危険警報","大雪危険警報"];
 async function fetchJmaWarnings(){
+  /* 警報・注意報の取得/表示は無効化（リンク先で確認するため） */
+  const body=document.getElementById('warn-body');
+  const cnt=document.getElementById('cnt-warn');
+  const sbA=document.getElementById('sb-alert-count');
+  if(body)body.innerHTML=`<div class="warn-empty"><div class="warn-empty-main"><span>🔗</span><span>警報・注意報はリンク先でご確認ください</span></div><div class="warn-empty-sub">本ダッシュボードでの警報・注意報の表示は停止しています。</div></div>`;
+  if(cnt){cnt.textContent='-';cnt.classList.remove('warn');cnt.classList.add('zero');}
+  if(sbA){sbA.textContent='リンク先で確認';sbA.style.color='var(--text-muted)';}
+  return;
   /* ══════════════════════════════════════════════════════════════
      警報・注意報は fetchJmaXmlRss() + fetchJmaWarningJsonItems() を
      統合した単一経路 renderJmaXmlWarn() で処理する。
@@ -3067,10 +3074,10 @@ function resetAll(){
 
 /* ════ テロップ制御 ════ */
 function updateTelop(warnings){
+  /* テロップ表示は無効化（リンク先で確認するため、常に非表示） */
   const bar = document.getElementById('telop-bar');
-  const scroll = document.getElementById('telop-scroll');
-  const label = document.getElementById('telop-label');
-  if(!bar || !scroll) return;
+  if(bar) bar.classList.remove('active');
+  return;
   if(warnings.length === 0){
     bar.classList.remove('active');
   } else {
@@ -3189,11 +3196,10 @@ document.addEventListener('keydown',e=>{
     case 'l': openChecklist(); break;
     case 't': openDrill(); break;
     case ',': openSettings(); break;
-    case '1': switchAtab('warn'); break;
-    case '2': switchAtab('quake'); break;
-    case '3': switchAtab('tsunami'); break;
-    case '4': switchAtab('typhoon'); break;
-    case '5': switchAtab('volcano'); break;
+    case '1': switchAtab('quake'); break;
+    case '2': switchAtab('tsunami'); break;
+    case '3': switchAtab('typhoon'); break;
+    case '4': switchAtab('volcano'); break;
   }
 });
 
@@ -3939,4 +3945,3 @@ document.addEventListener('keydown',e=>{
 </script>
 </body>
 </html>
-
