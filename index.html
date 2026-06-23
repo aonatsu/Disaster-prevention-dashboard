@@ -3318,7 +3318,7 @@ document.addEventListener('keydown',e=>{
   pointer-events:none;
 }
 .dm-card-label{
-  font-size:clamp(17px,1.8vw,26px);font-weight:700;letter-spacing:.1em;
+  font-size:clamp(28px,3.2vw,48px);font-weight:700;letter-spacing:.1em;
   color:rgba(122,179,212,0.8);position:absolute;top:14px;left:18px;
 }
 .dm-card-label-time{
@@ -3332,20 +3332,20 @@ document.addEventListener('keydown',e=>{
 #dm-cur-desc{font-size:clamp(24px,3vw,44px);font-weight:700;color:#e8f4ff;letter-spacing:.04em;flex-shrink:1;}
 #dm-cur-temp{font-size:clamp(68px,10vw,136px);font-weight:900;font-family:'Share Tech Mono',monospace;line-height:1;letter-spacing:-.02em;flex-shrink:1;}
 #dm-cur-temp-unit{font-size:clamp(28px,3.5vw,50px);font-weight:700;color:rgba(200,220,255,.7);margin-left:2px;flex-shrink:1;}
-#dm-cur-meta{display:flex;gap:clamp(10px,1.8vw,28px);font-size:clamp(18px,2.2vw,32px);color:rgba(122,179,212,.9);font-family:'Share Tech Mono',monospace;flex-wrap:wrap;justify-content:center;flex-shrink:1;}
-#dm-cur-meta b{color:#e8f4ff;}
+#dm-cur-meta{display:flex;gap:clamp(10px,1.8vw,28px);font-size:clamp(16px,2vw,28px);color:rgba(122,179,212,.9);font-family:'Share Tech Mono',monospace;flex-wrap:wrap;justify-content:center;flex-shrink:1;}
+#dm-cur-meta b{color:#e8f4ff;font-size:2em;line-height:1;vertical-align:baseline;}
 
 /* ── 右上：今日の予報 ── */
 #dm-today-icon{font-size:clamp(56px,8vw,106px);line-height:1;filter:drop-shadow(0 0 14px rgba(0,229,200,.3));margin-top:24px;flex-shrink:1;}
-#dm-today-desc{font-size:clamp(22px,2.8vw,42px);font-weight:700;color:#e8f4ff;flex-shrink:1;}
+#dm-today-desc{font-size:clamp(30px,4vw,60px);font-weight:700;color:#e8f4ff;flex-shrink:1;}
 #dm-today-date{font-size:clamp(16px,1.8vw,26px);color:rgba(122,179,212,.8);font-weight:700;letter-spacing:.06em;flex-shrink:1;}
 #dm-today-temps{display:flex;align-items:baseline;gap:6px;font-family:'Share Tech Mono',monospace;flex-shrink:1;}
-#dm-today-tmax{font-size:clamp(54px,7.5vw,100px);font-weight:900;color:#ff7070;line-height:1;}
-#dm-today-sep{font-size:clamp(28px,3.5vw,50px);color:rgba(90,122,153,.8);margin:0 4px;}
-#dm-today-tmin{font-size:clamp(44px,6vw,82px);font-weight:700;color:#80ccff;line-height:1;}
+#dm-today-tmax{font-size:clamp(72px,10vw,140px);font-weight:900;color:#ff7070;line-height:1;}
+#dm-today-sep{font-size:clamp(36px,4.5vw,66px);color:rgba(90,122,153,.8);margin:0 4px;}
+#dm-today-tmin{font-size:clamp(58px,8vw,110px);font-weight:700;color:#80ccff;line-height:1;}
 #dm-today-unit{font-size:clamp(22px,2.8vw,38px);color:rgba(180,200,220,.6);}
-#dm-today-rain{font-size:clamp(18px,2.2vw,32px);color:#64b5f6;font-family:'Share Tech Mono',monospace;font-weight:700;flex-shrink:1;}
-#dm-today-wind{font-size:clamp(16px,2vw,28px);color:rgba(122,179,212,.8);font-family:'Share Tech Mono',monospace;flex-shrink:1;}
+#dm-today-rain{font-size:clamp(16px,2vw,28px);color:#64b5f6;font-family:'Share Tech Mono',monospace;font-weight:700;flex-shrink:1;}
+
 
 /* ── 左下：WBGT ── */
 #dm-wbgt-card{border-color:rgba(255,170,0,.22);}
@@ -3411,7 +3411,7 @@ document.addEventListener('keydown',e=>{
   #dm-telop-scroll{font-size:24px;}
   #dm-grid{gap:7px;padding:7px;}
   .dm-card{padding:12px 16px 14px;gap:4px;}
-  .dm-card-label{font-size:clamp(13px,1.4vw,18px);top:10px;left:12px;}
+  .dm-card-label{font-size:clamp(22px,2.6vw,36px);top:10px;left:12px;}
   .dm-card-label-time{font-size:clamp(11px,1.1vw,15px);top:11px;right:12px;}
   #dm-cur-icon{font-size:clamp(48px,7vw,90px);}
   #dm-cur-desc{font-size:clamp(18px,2.4vw,34px);}
@@ -3419,11 +3419,11 @@ document.addEventListener('keydown',e=>{
   #dm-cur-temp-unit{font-size:clamp(22px,2.8vw,40px);}
   #dm-cur-meta{font-size:clamp(14px,1.8vw,26px);gap:clamp(8px,1.4vw,20px);}
   #dm-today-icon{font-size:clamp(44px,6.5vw,84px);}
-  #dm-today-desc{font-size:clamp(17px,2.2vw,34px);}
-  #dm-today-tmax{font-size:clamp(42px,6vw,80px);}
-  #dm-today-tmin{font-size:clamp(34px,4.8vw,66px);}
+  #dm-today-desc{font-size:clamp(22px,3vw,48px);}
+  #dm-today-tmax{font-size:clamp(56px,8vw,110px);}
+  #dm-today-tmin{font-size:clamp(44px,6.5vw,88px);}
   #dm-today-rain{font-size:clamp(14px,1.8vw,26px);}
-  #dm-today-wind{font-size:clamp(13px,1.6vw,22px);}
+  
   #dm-wbgt-val{font-size:clamp(70px,11vw,140px);}
   #dm-wbgt-unit{font-size:clamp(20px,2.6vw,36px);}
   #dm-wbgt-lvl-badge{font-size:clamp(18px,2.4vw,34px);padding:clamp(8px,1vw,14px) clamp(20px,3vw,48px);}
@@ -3445,7 +3445,7 @@ document.addEventListener('keydown',e=>{
   #dm-telop-scroll{font-size:19px;}
   #dm-grid{gap:5px;padding:5px;}
   .dm-card{padding:10px 12px;gap:3px;border-radius:10px;}
-  .dm-card-label{font-size:12px;top:8px;left:10px;}
+  .dm-card-label{font-size:20px;top:8px;left:10px;}
   .dm-card-label-time{font-size:10px;top:9px;right:10px;}
   #dm-cur-icon{font-size:clamp(38px,5.5vw,70px);margin-top:18px;}
   #dm-cur-desc{font-size:clamp(15px,2vw,28px);}
@@ -3453,11 +3453,11 @@ document.addEventListener('keydown',e=>{
   #dm-cur-temp-unit{font-size:clamp(18px,2.2vw,32px);}
   #dm-cur-meta{font-size:clamp(12px,1.5vw,20px);gap:8px;}
   #dm-today-icon{font-size:clamp(34px,5vw,66px);margin-top:18px;}
-  #dm-today-desc{font-size:clamp(13px,1.8vw,26px);}
-  #dm-today-tmax{font-size:clamp(32px,4.8vw,62px);}
+  #dm-today-desc{font-size:clamp(18px,2.5vw,38px);}
+  #dm-today-tmax{font-size:clamp(44px,6.5vw,80px);}
   #dm-today-sep{font-size:clamp(20px,2.8vw,38px);}
-  #dm-today-tmin{font-size:clamp(26px,3.8vw,50px);}
-  #dm-today-rain,#dm-today-wind{font-size:clamp(12px,1.5vw,20px);}
+  #dm-today-tmin{font-size:clamp(36px,5.2vw,64px);}
+  #dm-today-rain,
   #dm-wbgt-val{font-size:clamp(52px,8.5vw,108px);}
   #dm-wbgt-unit{font-size:clamp(16px,2vw,28px);}
   #dm-wbgt-val-row{margin-top:18px;}
@@ -3482,7 +3482,7 @@ document.addEventListener('keydown',e=>{
   #dm-telop-scroll{font-size:15px;}
   #dm-grid{gap:4px;padding:4px;overflow-y:auto;}
   .dm-card{padding:8px 10px;gap:2px;border-radius:8px;}
-  .dm-card-label{font-size:11px;top:6px;left:8px;}
+  .dm-card-label{font-size:18px;top:6px;left:8px;}
   .dm-card-label-time{font-size:9px;top:7px;right:8px;}
   #dm-cur-icon{font-size:clamp(32px,7vw,56px);margin-top:16px;}
   #dm-cur-desc{font-size:clamp(13px,3vw,22px);}
@@ -3490,11 +3490,11 @@ document.addEventListener('keydown',e=>{
   #dm-cur-temp-unit{font-size:clamp(15px,3.5vw,24px);}
   #dm-cur-meta{font-size:clamp(11px,2.5vw,16px);gap:6px;}
   #dm-today-icon{font-size:clamp(28px,6.5vw,48px);margin-top:16px;}
-  #dm-today-desc{font-size:clamp(12px,2.8vw,20px);}
-  #dm-today-tmax{font-size:clamp(28px,6vw,48px);}
+  #dm-today-desc{font-size:clamp(16px,4vw,28px);}
+  #dm-today-tmax{font-size:clamp(40px,8.5vw,62px);}
   #dm-today-sep{font-size:clamp(16px,3.5vw,28px);}
-  #dm-today-tmin{font-size:clamp(22px,5vw,38px);}
-  #dm-today-rain,#dm-today-wind{font-size:clamp(10px,2.3vw,16px);}
+  #dm-today-tmin{font-size:clamp(32px,7vw,50px);}
+  #dm-today-rain,
   #dm-wbgt-val{font-size:clamp(44px,9vw,72px);}
   #dm-wbgt-unit{font-size:clamp(14px,3vw,22px);}
   #dm-wbgt-val-row{margin-top:14px;}
@@ -3539,7 +3539,7 @@ document.addEventListener('keydown',e=>{
     padding:10px 12px;gap:4px;border-radius:8px;
     min-height:clamp(140px,22vh,200px);
   }
-  .dm-card-label{font-size:11px;top:6px;left:8px;}
+  .dm-card-label{font-size:18px;top:6px;left:8px;}
   .dm-card-label-time{font-size:9px;top:7px;right:8px;}
   #dm-cur-icon{font-size:clamp(36px,8vw,52px);margin-top:20px;}
   #dm-cur-desc{font-size:clamp(14px,3.5vw,20px);}
@@ -3547,11 +3547,11 @@ document.addEventListener('keydown',e=>{
   #dm-cur-temp-unit{font-size:clamp(18px,4.5vw,26px);}
   #dm-cur-meta{font-size:clamp(12px,3vw,16px);gap:10px;}
   #dm-today-icon{font-size:clamp(32px,7vw,48px);margin-top:20px;}
-  #dm-today-desc{font-size:clamp(13px,3.2vw,18px);}
-  #dm-today-tmax{font-size:clamp(32px,8vw,46px);}
+  #dm-today-desc{font-size:clamp(17px,4.5vw,24px);}
+  #dm-today-tmax{font-size:clamp(44px,11vw,60px);}
   #dm-today-sep{font-size:clamp(18px,4.5vw,26px);}
-  #dm-today-tmin{font-size:clamp(26px,6.5vw,38px);}
-  #dm-today-rain,#dm-today-wind{font-size:clamp(11px,2.8vw,16px);}
+  #dm-today-tmin{font-size:clamp(36px,9vw,50px);}
+  #dm-today-rain,
   #dm-wbgt-val{font-size:clamp(48px,12vw,70px);}
   #dm-wbgt-unit{font-size:clamp(18px,4.5vw,26px);}
   #dm-wbgt-val-row{margin-top:20px;}
@@ -3576,8 +3576,8 @@ document.addEventListener('keydown',e=>{
   #dm-cur-icon{font-size:clamp(28px,7vw,44px);}
   #dm-cur-temp{font-size:clamp(36px,9vw,52px);}
   #dm-cur-meta{font-size:clamp(10px,2.5vw,14px);gap:7px;}
-  #dm-today-tmax{font-size:clamp(28px,7vw,40px);}
-  #dm-today-tmin{font-size:clamp(22px,5.5vw,32px);}
+  #dm-today-tmax{font-size:clamp(38px,9.5vw,54px);}
+  #dm-today-tmin{font-size:clamp(30px,7.5vw,44px);}
   #dm-wbgt-val{font-size:clamp(40px,10vw,58px);}
   #dm-wbgt-lvl-badge{font-size:clamp(12px,3vw,17px);padding:5px 14px;}
   #dm-thunder-ring{width:clamp(60px,14vw,86px);height:clamp(60px,14vw,86px);}
@@ -3623,7 +3623,7 @@ document.addEventListener('keydown',e=>{
       <div id="dm-cur-meta">
         <span>湿度&thinsp;<b id="dm-cur-hum">--</b>%</span>
         <span>体感&thinsp;<b id="dm-cur-feel">--</b>°</span>
-        <span>風&thinsp;<b id="dm-cur-wind">--</b>m/s</span>
+
       </div>
     </div>
 
@@ -3639,7 +3639,7 @@ document.addEventListener('keydown',e=>{
         <span id="dm-today-tmin">--</span><span style="font-size:clamp(18px,2.2vw,32px);color:rgba(180,200,220,.6)">°</span>
       </div>
       <div id="dm-today-rain">☔ 降水確率 <b id="dm-today-pp">--</b>%</div>
-      <div id="dm-today-wind">💨 最大風速 <b id="dm-today-wmax">--</b> m/s</div>
+
     </div>
 
     <!-- 左下：WBGT -->
@@ -3832,7 +3832,7 @@ document.addEventListener('keydown',e=>{
     document.getElementById('dm-cur-temp').style.color=tempCol;
     document.getElementById('dm-cur-feel').textContent=feel;
     document.getElementById('dm-cur-hum').textContent=hum;
-    document.getElementById('dm-cur-wind').textContent=wind;
+    
     const ft=document.getElementById('forecast3-time')?.textContent||'';
     document.getElementById('dm-cur-time').textContent=ft;
 
@@ -3844,7 +3844,7 @@ document.addEventListener('keydown',e=>{
       document.getElementById('dm-today-tmax').textContent=td.tmax;
       document.getElementById('dm-today-tmin').textContent=td.tmin;
       document.getElementById('dm-today-pp').textContent=td.pp;
-      document.getElementById('dm-today-wmax').textContent=td.wmax;
+      
       document.getElementById('dm-today-label-date').textContent=td.dateLabel;
     }   /* WBGT */
     const wbgtTxt=document.getElementById('wx-wbgt')?.textContent;
