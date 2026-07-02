@@ -1589,12 +1589,46 @@ function applyWbgt(wbgt, srcLabel){
 const ENV_WBGT_POINT='51116';
 let envWbgtLastVal=null;
 
+/* 3プロキシを並列で叩き、最速の成功結果を採用（1本失敗しても他が生きていれば即取得） */
+async function proxyFetch(url, timeout=12000, validator=null){
+  /* r.jina.aiは「リーダー」でJSON/CSVをテキスト要約に変換してしまい、
+     Promise.anyがそれを"成功"として採用すると後段の解析が必ず失敗するため除外。
+     代わりに生データをそのまま返すプロキシのみを使用し、本数も4本に増強。
+     さらにvalidatorで中身が期待形式か検証し、HTMLエラーページ等の
+     "HTTP200だが中身が不正"なレスポンスをPromise.anyの勝者にしない。 */
+  const mkProxy=[
+    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u=>`https://proxy.corsfix.com/?${u}`,
+    u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+  ];
+  /* thingproxy.freeboard.ioはDNS解決不可（サービス廃止）のため除外済み */
+  const attempt=async(mk)=>{
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),timeout);
+    try{
+      const r=await fetch(mk(url),{cache:'no-cache',signal:ctrl.signal});
+      clearTimeout(t);
+      if(!r.ok) throw new Error('http'+r.status);
+      const txt=await r.text();
+      if(!txt||!txt.trim()) throw new Error('empty');
+      if(validator&&!validator(txt)) throw new Error('invalid content');
+      return txt;
+    }catch(e){ clearTimeout(t); throw e; }
+  };
+  for(let round=0;round<3;round++){ /* 全滅時は2回まで再試行（回数を増強） */
+    try{ return await Promise.any(mkProxy.map(attempt)); }
+    catch(e){ if(round===2) return null; }
+  }
+  return null;
+}
+
 /* 環境省公式WebAPI（実況推定値・JSON、令和8年度公開）
    ※実況ページはJS描画のためHTMLスクレイピング不可。API直叩きが唯一の確実な方法 */
 async function fetchEnvWbgtApi(dateFrom,dateTo){
   const url=`https://www.wbgt.env.go.jp/api/v1/getSurveyData?data_type=0&location_type=1`+
     `&wbgt_nos=${ENV_WBGT_POINT}&date_from=${dateFrom}&date_to=${dateTo}`;
-  const text=await proxyFetch(url);
+  const text=await proxyFetch(url,12000,t=>{try{const j=JSON.parse(t.trim());return j&&typeof j==='object'&&('status' in j);}catch{return false;}});
   if(!text) throw new Error('プロキシ全滅');
   const json=JSON.parse(text.trim());
   if(json.status!=='success'||!json.data?.length) throw new Error(json.errMsg||'データなし');
@@ -1602,26 +1636,8 @@ async function fetchEnvWbgtApi(dateFrom,dateTo){
   return {val:parseFloat(latest.wbgt_WO), date:latest.wbgt_date};
 }
 
-/* CORS プロキシを順番に試す共通ヘルパー */
-async function proxyFetch(url, timeout=10000){
-  const mkProxy=[
-    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-    u=>`https://r.jina.ai/${u}`,
-  ];
-  for(const mk of mkProxy){
-    const ctrl=new AbortController();
-    const t=setTimeout(()=>ctrl.abort(),timeout);
-    try{
-      const r=await fetch(mk(url),{cache:'no-cache',signal:ctrl.signal});
-      clearTimeout(t);
-      if(!r.ok) continue;
-      const txt=await r.text();
-      if(txt&&txt.trim()) return txt;
-    }catch(e){ clearTimeout(t); }
-  }
-  return null;
-}
+
+
 
 async function fetchEnvWbgt(){
   const now=new Date();
@@ -1648,9 +1664,9 @@ async function fetchEnvWbgt(){
 
   /* ② フォールバック: 実況値CSV（当月分・毎時値） */
   const ym=`${now.getFullYear()}${pad(now.getMonth()+1)}`;
-  const csvUrl=`https://www.wbgt.env.go.jp/csv/wbgt/wbgt_${ENV_WBGT_POINT}_${ym}.csv`;
+  const csvUrl=`https://www.wbgt.env.go.jp/est15WG/dl/wbgt_${ENV_WBGT_POINT}_${ym}.csv`;
   try{
-    const text=await proxyFetch(csvUrl);
+    const text=await proxyFetch(csvUrl,12000,t=>{const s=t.trim();return !s.startsWith('<')&&s.includes(',');});
     if(!text) throw new Error('全プロキシ失敗');
 
     /* CSV形式: Date,Time,51116 / YYYY/MM/DD,HH:00,値×10 */
@@ -1682,7 +1698,9 @@ async function fetchEnvWbgt(){
     return true;
   }catch(e){
     console.warn('[WBGT-CSV] 取得エラー:',e.message);
-    applyWbgt(null,'取得失敗');
+    /* 実測値のみ使用。全滅時は前回取得値を保持（無ければ--） */
+    if(envWbgtLastVal!=null){ applyWbgt(envWbgtLastVal,'取得失敗・前回値'); }
+    else{ applyWbgt(null,'取得失敗'); }
     return false;
   }
 }
