@@ -1639,6 +1639,22 @@ async function fetchEnvWbgtApi(dateFrom,dateTo){
 
 
 
+async function fetchEnvWbgtSpPage(){
+  /* 環境省 モバイル版(SP)ページを直接スクレイピング。
+     このページはJS無効時でもサーバー側で数値をHTMLに直接埋め込んで返すため、
+     JSレンダリングに依存するAPIより確実に値が取れる場合がある。 */
+  const url=`https://www.wbgt.env.go.jp/sp/graph_ref_td.php?region=05&prefecture=51&point=${ENV_WBGT_POINT}`;
+  const text=await proxyFetch(url,12000,t=>t.includes('暑さ指数'));
+  if(!text) throw new Error('プロキシ全滅');
+  const labelIdx=text.indexOf('現在の暑さ指数');
+  const searchText=text.slice(labelIdx>=0?labelIdx:0);
+  const m=/([0-9]{1,2}(?:\.[0-9])?)[\s\S]{0,80}?（\s*(ほぼ安全|注意|警戒|厳重警戒|危険)\s*）/.exec(searchText);
+  if(!m) throw new Error('数値抽出失敗');
+  const val=parseFloat(m[1]);
+  if(isNaN(val)) throw new Error('数値変換失敗');
+  return val;
+}
+
 async function fetchEnvWbgt(){
   const now=new Date();
   const mo=now.getMonth()+1, da=now.getDate();
@@ -1660,6 +1676,16 @@ async function fetchEnvWbgt(){
     throw new Error('値なし');
   }catch(e){
     console.warn('[WBGT-API] 取得エラー:',e.message);
+  }
+
+  /* ①.5 フォールバック: 環境省SPページ直接スクレイピング（JS不要・サーバー側埋め込み値） */
+  try{
+    const val=await fetchEnvWbgtSpPage();
+    envWbgtLastVal=val;
+    applyWbgt(val,'環境省・豊田(SPページ)');
+    return true;
+  }catch(e){
+    console.warn('[WBGT-SP] 取得エラー:',e.message);
   }
 
   /* ② フォールバック: 実況値CSV（当月分・毎時値） */
