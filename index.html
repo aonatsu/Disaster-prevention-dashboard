@@ -81,12 +81,10 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
 .h-settings-btn:hover{background:rgba(0,180,255,0.22)}
 
 /* WEATHER BAR — 拡張版 11項目 */
-#weather-bar{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;padding:5px 8px;background:var(--bg-panel);border-bottom:1px solid var(--border);}
+#weather-bar{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;padding:5px 8px;background:var(--bg-panel);border-bottom:1px solid var(--border);}
 .wx-cell{background:var(--bg-card);border-radius:6px;padding:8px 6px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;transition:border-color .2s}
 .wx-cell.alert-glow{border-color:var(--danger);box-shadow:0 0 8px rgba(255,59,59,0.4)}
 .wx-cell.warn-glow{border-color:var(--warn);box-shadow:0 0 6px rgba(255,170,0,0.3)}
-/* WBGT危険レベル：緊急モード(danger-active)と調和するパルス発光 */
-.wx-cell.wbgt-danger-pulse{border-color:var(--danger);animation:wbgtDangerPulse 1.8s ease-in-out infinite}
 .wx-label{font-size:13px;font-weight:700;color:var(--text-label);letter-spacing:.05em;line-height:1;}
 .wx-value{font-size:28px;font-weight:700;font-family:var(--font-mono);line-height:1.1}
 .wx-unit{font-size:12px;font-weight:600;color:var(--text-label);line-height:1}
@@ -455,7 +453,7 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
   #content{display:block;padding:8px}
   #col-left,#col-center,#col-right{display:block}
   .panel{margin-bottom:8px}
-  #weather-bar{display:grid;grid-template-columns:repeat(9,1fr);background:#fff;color:#000}
+  #weather-bar{display:grid;grid-template-columns:repeat(11,1fr);background:#fff;color:#000}
   .wx-cell{background:#fff;color:#000;border:1px solid #888}
   .wx-label,.wx-value,.wx-unit{color:#000}
 }
@@ -550,8 +548,10 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
   /* ウェザーバー：重要な6項目のみ表示（天気・気温・体感・湿度・WBGT・風） */
   #weather-bar{grid-template-columns:repeat(6,1fr);padding:3px 4px;gap:2px}
   #wx-uv-cell,#wx-aqi-cell,
-  div.wx-cell:nth-child(8),/* PM2.5 */
+  div.wx-cell:nth-child(8), /* 雷確率 */
+  div.wx-cell:nth-child(10),/* PM2.5 */
   #wx-sun-cell{display:none}
+  #wx-wbgt-src{display:none}
   .wx-cell{padding:4px 2px}
   .wx-value{font-size:18px}
   .wx-label{font-size:9px}
@@ -607,8 +607,8 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
   .wx-label{font-size:8px}
   .wx-unit{font-size:7px}
   #wx-icon-cell .wx-value{font-size:20px}
-  #wx-feel-cell,#wx-uv-cell,#wx-aqi-cell,
-  #wx-wind-cell,#wx-sun-cell{display:none}
+  #wx-feel-cell,#wx-thunder-cell,#wx-uv-cell,#wx-aqi-cell,
+  #wx-wind-cell,#wx-sun-cell,#wx-wbgt-src{display:none}
   #content{grid-template-columns:1fr;overflow-y:auto;height:auto}
   #col-left,#col-center,#col-right{grid-column:1;grid-row:auto;flex-direction:column;max-height:none;overflow:visible}
   #radar-frame-wrap{min-height:180px;max-height:220px}
@@ -723,7 +723,7 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
   </div>
 </header>
 
-<!-- ════════ WEATHER BAR (9項目) ════════ -->
+<!-- ════════ WEATHER BAR (11項目) ════════ -->
 <div id="weather-bar">
   <div class="wx-cell" id="wx-icon-cell">
     <span class="wx-label">天気</span>
@@ -745,6 +745,12 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
     <span class="wx-value" id="wx-hum" style="color:var(--accent)">--</span>
     <span class="wx-unit">%</span>
   </div>
+  <div class="wx-cell" id="wx-wbgt-cell" title="WBGT 暑さ指数（℃）">
+    <span class="wx-label">WBGT</span>
+    <span class="wx-value" id="wx-wbgt">--</span>
+    <span class="wx-unit" id="wx-wbgt-lvl">--</span>
+    <span class="wx-unit" id="wx-wbgt-src" style="font-size:7px;opacity:.6;letter-spacing:.02em">--</span>
+  </div>
   <div class="wx-cell" id="wx-uv-cell" title="UV 紫外線指数">
     <span class="wx-label">UV指数</span>
     <span class="wx-value" id="wx-uv">--</span>
@@ -754,6 +760,11 @@ header{display:flex;align-items:center;padding:0 10px;gap:6px;background:linear-
     <span class="wx-label">風</span>
     <span class="wx-value" id="wx-wind"><span id="wx-wind-spd">--</span><span class="wind-arrow" id="wx-wind-arr">↑</span></span>
     <span class="wx-unit">m/s</span>
+  </div>
+  <div class="wx-cell">
+    <span class="wx-label">雷確率</span>
+    <span class="wx-value" id="wx-thunder" style="color:var(--warn)">--</span>
+    <span class="wx-unit">%</span>
   </div>
   <div class="wx-cell" id="wx-aqi-cell" title="空気質指数（European AQI）">
     <span class="wx-label">空気質</span>
@@ -1477,24 +1488,8 @@ function countdown(){
 }
 setInterval(countdown,1000);
 
-/* ────────────────────────────────────────────
-   WBGT取得 設定（切替フラグ）
-   mode  : 'proxy' … 無料CORSプロキシ経由で環境省CSVを直接取得（テスト用・既定）
-           'gas'   … GAS等の自作中継Webアプリ経由（CORS制限なし・推奨／将来切替）
-   point : 観測地点コード（豊田市＝51116。環境省サイトで豊田に割当。要変更時のみ書換）
-   gasUrl: 中継WebアプリのURL。末尾に ?point=&ym= を自動付与するため、
-           GAS側で e.parameter.point / e.parameter.ym を受け取りCSV本文を返す実装とする
-   intervalMs: 自動更新周期（10分）
-──────────────────────────────────────────── */
-const WBGT_CFG={
-  mode:'proxy',
-  point:'51116',
-  gasUrl:'',   /* 例: 'https://script.google.com/macros/s/XXXXXXXX/exec' */
-  intervalMs:10*60*1000,
-};
-
-/* WBGTはOpen-Meteo更新(refreshMin分毎)とは別に10分毎の短周期で単独更新 */
-setInterval(fetchEnvWbgt,WBGT_CFG.intervalMs);
+/* WBGTはOpen-Meteo更新(refreshMin分毎)とは別に3分毎の短周期で単独更新 */
+setInterval(fetchEnvWbgt,3*60*1000);
 
 function doRefresh(){
  reloadRadar();
@@ -1557,56 +1552,24 @@ function dirJa(deg){if(deg==null)return '';return DIRS[Math.round(((deg%360)/22.
 let lastHourly=null,lastDaily=null,lastHistory=null;
 
 /* ════════════════════════════════════════════
-   WBGT 反映ユーティリティ
-   上部天気バーのWBGTセルは廃止し、値は
-   ①ステータスバー ②ディスプレイモード大型パネル へ反映する。
+   WBGT DOM反映ユーティリティ
 ════════════════════════════════════════════ */
-/* WBGT値→表示メタ（クラス・ラベル・色・行動目安・枠色） */
-function wbgtMeta(w){
-  if(w==null||isNaN(w))return {cls:'wbgt-caution',lv:'--',col:'#aaa',tip:'データ取得中',bc:'rgba(255,170,0,.22)'};
-  if(w>=31)return {cls:'wbgt-danger', lv:'🔴 危　険', col:'#ff3b3b',tip:'運動は原則中止 ／ 特別の場合以外は屋外活動禁止',bc:'rgba(255,59,59,.7)'};
-  if(w>=28)return {cls:'wbgt-severe', lv:'🟠 厳重警戒',col:'#ff6418',tip:'激しい運動は中止 ／ 体力低下者は活動中止',      bc:'rgba(255,100,30,.5)'};
-  if(w>=25)return {cls:'wbgt-warning',lv:'🟡 警　戒', col:'#ffaa00',tip:'積極的に休憩 ／ 激しい運動は30分以内',        bc:'rgba(255,170,0,.45)'};
-  if(w>=21)return {cls:'wbgt-caution',lv:'🔵 注　意', col:'#ffe050',tip:'熱中症の危険あり ／ 積極的に水分補給',        bc:'rgba(255,224,80,.4)'};
-  return       {cls:'wbgt-safe',   lv:'✅ ほぼ安全',col:'#00d97e',tip:'通常活動可 ／ 水分補給を忘れずに',            bc:'rgba(0,217,126,.3)'};
-}
-/* ディスプレイモードの大型WBGTパネルへ反映（オーバーレイ未生成時は何もしない） */
-function renderWbgtBig(w, srcLabel){
-  const card=document.getElementById('dm-wbgt-big-card');
-  if(!card)return;
-  const m=wbgtMeta(w);
-  const valEl=document.getElementById('dm-wbgt-big-val');
-  const unitEl=document.getElementById('dm-wbgt-big-unit');
-  const badge=document.getElementById('dm-wbgt-big-badge');
-  const note=document.getElementById('dm-wbgt-big-note');
-  const timeEl=document.getElementById('dm-wbgt-big-time');
-  if(valEl){valEl.textContent=(w==null||isNaN(w))?'--':w;valEl.style.color=m.col;}
-  if(unitEl)unitEl.style.color=m.col;
-  if(badge){badge.className='dm-wbgt-big-badge '+m.cls;badge.textContent=m.lv;}
-  if(note)note.textContent=m.tip;
-  card.style.borderColor=m.bc;
-  card.classList.toggle('wbgt-danger-pulse-big',(w!=null&&!isNaN(w)&&w>=31));
-  if(timeEl)timeEl.textContent=srcLabel||'';
-}
 function applyWbgt(wbgt, srcLabel){
-  const [wbgtLv,wbgtCol,,]=wbgtLevel(wbgt);
-  /* 最新値を保持（ディスプレイモード再描画時に参照） */
-  window.currentWbgt=wbgt;
-  window.currentWbgtSrc=srcLabel||'';
-  /* 成功値のみ永続化（リロード直後に前回値を即時表示するため） */
-  if(wbgt!=null&&!isNaN(wbgt)&&!/取得失敗|前回値/.test(srcLabel||'')){
-    try{localStorage.setItem('wbgt_cache',JSON.stringify({v:wbgt,s:srcLabel||'',t:Date.now()}));}catch(e){}
-  }
-  /* ①ステータスバー */
-  const sb=document.getElementById('sb-wbgt');
-  if(sb){
-    sb.textContent=wbgt!=null?`${wbgt}(${wbgtLv})`:'--';
-    sb.style.color=wbgtCol;
-  }
-  /* ②ディスプレイモード大型パネル */
-  renderWbgtBig(wbgt, srcLabel);
+  const [wbgtLv,wbgtCol,wbgtCls,wbgtAlert]=wbgtLevel(wbgt);
+  const el=document.getElementById('wx-wbgt');
+  const lvEl=document.getElementById('wx-wbgt-lvl');
+  const srcEl=document.getElementById('wx-wbgt-src');
+  const wbgtCell=document.getElementById('wx-wbgt-cell');
+  el.textContent=wbgt!=null?wbgt:'--';
+  el.style.color=wbgtCol;
+  lvEl.textContent=wbgtLv;
+  if(srcEl)srcEl.textContent=srcLabel||'';
+  wbgtCell.classList.remove('alert-glow','warn-glow');
+  if(wbgtCls)wbgtCell.classList.add(wbgtCls);
+  wbgtCell.title=`WBGT 暑さ指数（℃）— ${srcLabel||''}`;
+  document.getElementById('sb-wbgt').textContent=wbgt!=null?`${wbgt}(${wbgtLv})`:'--';
+  document.getElementById('sb-wbgt').style.color=wbgtCol;
   /* 危険レベル通知 */
-  const wbgtAlert=(wbgt!=null&&!isNaN(wbgt)&&wbgt>=31);
   if(wbgtAlert&&CFG.triggerWbgt&&initialFetchDone){
     const sig=`wbgt-${Math.floor(wbgt)}-${new Date().getHours()}`;
     if(window.lastWbgtSig!==sig){
@@ -1623,42 +1586,39 @@ function applyWbgt(wbgt, srcLabel){
    ③ 夏季外・全失敗: "--" 表示（推定計算は行わない）
    CORS回避: allorigins.win プロキシ
 ════════════════════════════════════════════ */
-const ENV_WBGT_POINT=WBGT_CFG.point;  /* 後方互換（API/SPフォールバックが参照） */
+const ENV_WBGT_POINT='51116';
 let envWbgtLastVal=null;
 
-/* 複数リレーを並列で叩き、最速の"検証合格"結果を採用。
-   opts.reader=true の場合のみ r.jina.ai（HTML→テキスト変換リーダー）も併用する。
-   ※readerは生CSV/JSONを破壊するため、テキスト解析前提のSPページ取得専用。
-   allorigins は /raw と /get(JSONラップ) の2経路を別リレーとして扱い、
-   validatorで"HTTP200だが中身不正"をPromise.anyの勝者にしない。 */
-async function proxyFetch(url, timeout=12000, validator=null, opts={}){
-  const relays=[
-    {mk:u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`},
-    {mk:u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`},
-    {mk:u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
-     unwrap:t=>{try{const j=JSON.parse(t);return typeof j.contents==='string'?j.contents:null;}catch{return null;}}},
-    {mk:u=>`https://proxy.corsfix.com/?${u}`},
-    {mk:u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`},
+/* 3プロキシを並列で叩き、最速の成功結果を採用（1本失敗しても他が生きていれば即取得） */
+async function proxyFetch(url, timeout=12000, validator=null){
+  /* r.jina.aiは「リーダー」でJSON/CSVをテキスト要約に変換してしまい、
+     Promise.anyがそれを"成功"として採用すると後段の解析が必ず失敗するため除外。
+     代わりに生データをそのまま返すプロキシのみを使用し、本数も4本に増強。
+     さらにvalidatorで中身が期待形式か検証し、HTMLエラーページ等の
+     "HTTP200だが中身が不正"なレスポンスをPromise.anyの勝者にしない。 */
+  const mkProxy=[
+    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u=>`https://proxy.corsfix.com/?${u}`,
+    u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,
   ];
-  if(opts.reader)relays.push({mk:u=>`https://r.jina.ai/${u}`});
-  const attempt=async(rl)=>{
+  /* thingproxy.freeboard.ioはDNS解決不可（サービス廃止）のため除外済み */
+  const attempt=async(mk)=>{
     const ctrl=new AbortController();
     const t=setTimeout(()=>ctrl.abort(),timeout);
     try{
-      const r=await fetch(rl.mk(url),{cache:'no-cache',signal:ctrl.signal});
+      const r=await fetch(mk(url),{cache:'no-cache',signal:ctrl.signal});
       clearTimeout(t);
       if(!r.ok) throw new Error('http'+r.status);
-      let txt=await r.text();
-      if(rl.unwrap){txt=rl.unwrap(txt);if(txt==null)throw new Error('unwrap失敗');}
+      const txt=await r.text();
       if(!txt||!txt.trim()) throw new Error('empty');
       if(validator&&!validator(txt)) throw new Error('invalid content');
       return txt;
     }catch(e){ clearTimeout(t); throw e; }
   };
-  for(let round=0;round<3;round++){
-    try{ return await Promise.any(relays.map(attempt)); }
+  for(let round=0;round<3;round++){ /* 全滅時は2回まで再試行（回数を増強） */
+    try{ return await Promise.any(mkProxy.map(attempt)); }
     catch(e){ if(round===2) return null; }
-    await new Promise(res=>setTimeout(res,1500)); /* 瞬断対策：ラウンド間に待機 */
   }
   return null;
 }
@@ -1764,189 +1724,137 @@ async function fetchEnvWbgtApi(dateFrom,dateTo){
 
 
 async function fetchEnvWbgtSpPage(){
-  /* 環境省 モバイル版(SP)実況ページを取得。
-     このページはJS無効でもサーバー側で「NN時現在の暑さ指数（通常の暑さ指数）
-     22.8 （注意）」の形で数値を直接HTMLに埋め込んで返すため、実況値取得の主経路とする。
-     取得経路は WBGT_CFG.mode で切替（'gas' / 'proxy'）。 */
-  const spUrl=`https://www.wbgt.env.go.jp/sp/graph_ref_td.php?region=05&prefecture=51&point=${WBGT_CFG.point}`;
-  let text=null;
-  if(WBGT_CFG.mode==='gas'&&WBGT_CFG.gasUrl){
-    /* GAS等の中継Webアプリ経由（プロキシ不要）。GAS側でSPページ本文をそのまま返す実装とする */
-    const sep=WBGT_CFG.gasUrl.includes('?')?'&':'?';
-    const relayUrl=`${WBGT_CFG.gasUrl}${sep}point=${WBGT_CFG.point}&type=sp`;
-    const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),12000);
-    try{
-      const r=await fetch(relayUrl,{cache:'no-cache',signal:ctrl.signal});
-      clearTimeout(tid);
-      if(!r.ok)throw new Error('http'+r.status);
-      text=await r.text();
-    }catch(e){ clearTimeout(tid); throw new Error('GAS中継失敗:'+e.message); }
-  }else{
-    /* 無料CORSプロキシ経由（複数を並列で叩き最速の合格を採用。
-       SPページはテキスト解析のため r.jina.ai リーダー経由も併用可） */
-    text=await proxyFetch(spUrl,15000,t=>t.includes('暑さ指数'),{reader:true});
-  }
+  /* 環境省 モバイル版(SP)ページを直接スクレイピング。
+     このページはJS無効時でもサーバー側で数値をHTMLに直接埋め込んで返すため、
+     JSレンダリングに依存するAPIより確実に値が取れる場合がある。 */
+  const url=`https://www.wbgt.env.go.jp/sp/graph_ref_td.php?region=05&prefecture=51&point=${ENV_WBGT_POINT}`;
+  const text=await proxyFetch(url,12000,t=>t.includes('暑さ指数'));
   if(!text) throw new Error('プロキシ全滅');
-
-  /* HTMLタグ・実体参照・全角空白を正規化してから解析（タグ混在に強い） */
-  const plain=text
-    .replace(/<br\s*\/?>/gi,'\n')
-    .replace(/<[^>]+>/g,' ')
-    .replace(/&nbsp;/g,' ')
-    .replace(/\u3000/g,' ');
-
-  /* 「現在の暑さ指数」以降に限定し、最初の「数値 （レベル）」を現況値として採用。
-     値とレベルの間の℃や空白・タグ由来の余白を許容しつつ、別数値の混入は防止する。 */
-  const anchor=plain.search(/現在の暑さ指数/);
-  const scope=anchor>=0?plain.slice(anchor):plain;
-  const m=/(\d{1,2}(?:\.\d)?)[^（0-9]{0,12}（\s*(ほぼ安全|注意|警戒|厳重警戒|危険)\s*）/.exec(scope);
+  const labelIdx=text.indexOf('現在の暑さ指数');
+  const searchText=text.slice(labelIdx>=0?labelIdx:0);
+  const m=/([0-9]{1,2}(?:\.[0-9])?)[\s\S]{0,80}?（\s*(ほぼ安全|注意|警戒|厳重警戒|危険)\s*）/.exec(searchText);
   if(!m) throw new Error('数値抽出失敗');
   const val=parseFloat(m[1]);
   if(isNaN(val)) throw new Error('数値変換失敗');
-
-  /* 観測時刻（例:「20時現在」）を併せて取得し、最終取得日時としてセルに表示 */
-  const tm=/(\d{1,2})時現在/.exec(plain);
-  const timeText=tm?`${tm[1]}時現在`:'';
-  return {val,timeText};
+  return val;
 }
 
-/* ────────────────────────────────────────────
-   環境省 実況値CSV（1地点・当月分）取得＋解析【主経路】
-   CSV形式（環境省公式）:
-     1行目 : Date,Time,<地点番号>
-     2行目～: YYYY/MM/DD,HH:00,<WBGT値×10>   ※未観測時刻は空欄
-   取得経路（WBGT_CFG.mode で切替）:
-     'gas'   … gasUrl へ ?point=&ym= を付与して直接取得（CORS制限なし）
-     'proxy' … 環境省CSVを無料CORSプロキシ経由で取得（既定）
-   返却: {val:℃(小数1桁), time:'HH:00'}
-──────────────────────────────────────────── */
-async function fetchEnvWbgtCsv(){
+async function fetchEnvWbgt(){
+  const now=new Date();
+  const mo=now.getMonth()+1, da=now.getDate();
+  const inSeason=(mo>4||(mo===4&&da>=22))&&(mo<10||(mo===10&&da<=21));
+  if(!inSeason){
+    applyWbgt(null,'夏季外（情報提供期間外）');
+    return false;
+  }
+
+  /* ① 環境省公式WebAPI（実況推定値・JSON） — 直近6時間の最新値 */
+  const fmtDT=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}0000`;
+  try{
+    const r=await fetchEnvWbgtApi(fmtDT(new Date(now.getTime()-6*3600*1000)),fmtDT(now));
+    if(!isNaN(r.val)){
+      envWbgtLastVal=r.val;
+      applyWbgt(r.val,'環境省・豊田(API)');
+      return true;
+    }
+    throw new Error('値なし');
+  }catch(e){
+    console.warn('[WBGT-API] 取得エラー:',e.message);
+  }
+
+  /* ①.5 フォールバック: 環境省SPページ直接スクレイピング（JS不要・サーバー側埋め込み値） */
+  try{
+    const val=await fetchEnvWbgtSpPage();
+    envWbgtLastVal=val;
+    applyWbgt(val,'環境省・豊田(SPページ)');
+    return true;
+  }catch(e){
+    console.warn('[WBGT-SP] 取得エラー:',e.message);
+  }
+
+  /* ② フォールバック: 実況値CSV（当月分・毎時値） */
+  const ym=`${now.getFullYear()}${pad(now.getMonth()+1)}`;
+  const csvUrl=`https://www.wbgt.env.go.jp/est15WG/dl/wbgt_${ENV_WBGT_POINT}_${ym}.csv`;
+  try{
+    const text=await proxyFetch(csvUrl,12000,t=>{const s=t.trim();return !s.startsWith('<')&&s.includes(',');});
+    if(!text) throw new Error('全プロキシ失敗');
+
+    /* CSV形式: Date,Time,51116 / YYYY/MM/DD,HH:00,値×10 */
+    const lines=text.trim().split('\n').filter(l=>l.trim()&&!l.startsWith('Date'));
+    if(!lines.length)throw new Error('empty csv');
+
+    /* 現在時刻に最も近い行を探す（過去〜現在の最新） */
+    const nowH=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())}`;
+    const nowHH=now.getHours();
+    let best=null, bestDiff=Infinity;
+    for(const line of lines){
+      const parts=line.split(',');
+      if(parts.length<3)continue;
+      const datePart=parts[0].trim();
+      const timePart=parts[1].trim();  /* "HH:00" */
+      const rawVal=parts[2]?.trim();
+      if(!rawVal||rawVal==='')continue;
+      const lineH=parseInt(timePart.split(':')[0])||0;
+      /* 今日の行だけ対象 */
+      if(datePart!==nowH)continue;
+      const diff=Math.abs(nowHH-lineH);
+      if(diff<bestDiff){bestDiff=diff;best={val:parseInt(rawVal),h:lineH};}
+    }
+
+    if(!best)throw new Error('no data for today');
+    const wbgt=Math.round(best.val/10*10)/10; /* 10で割り小数1桁 */
+    envWbgtLastVal=wbgt;
+    applyWbgt(wbgt,'環境省・豊田(CSV)');
+    return true;
+  }catch(e){
+    console.warn('[WBGT-CSV] 取得エラー:',e.message);
+    /* 実測値のみ使用。全滅時は前回取得値を保持（無ければ--） */
+    if(envWbgtLastVal!=null){ applyWbgt(envWbgtLastVal,'取得失敗・前回値'); }
+    else{ applyWbgt(null,'取得失敗'); }
+    return false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   ディスプレイモード専用 WBGT取得
+   R08_wbgt_data_service_manual.pdf「2-A 地点別の実況値データファイル」
+   のみに準拠して取得する（非公式API・スクレイピングは使用しない）。
+   ※実況値CSVは小数第1位の値がそのまま格納され、10除算は不要
+     （予測値CSVのみ10倍格納・要除算。既存fetchEnvWbgtのCSV
+     フォールバックはこの点を誤って実装していたため、
+     本関数では正しくparseFloatのみで処理する）。
+════════════════════════════════════════════ */
+let dmWbgtLastVal=null;
+async function fetchEnvWbgtOfficialCsv(){
   const now=new Date();
   const ym=`${now.getFullYear()}${pad(now.getMonth()+1)}`;
-  const envUrl=`https://www.wbgt.env.go.jp/est15WG/dl/wbgt_${WBGT_CFG.point}_${ym}.csv`;
-  const csvValidator=t=>{const s=t.trim();return !!s&&!s.startsWith('<')&&s.includes(',');};
-
-  let text=null;
-  if(WBGT_CFG.mode==='gas'&&WBGT_CFG.gasUrl){
-    /* GAS等の中継Webアプリ経由（プロキシ不要） */
-    const sep=WBGT_CFG.gasUrl.includes('?')?'&':'?';
-    const relayUrl=`${WBGT_CFG.gasUrl}${sep}point=${WBGT_CFG.point}&ym=${ym}`;
-    const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),12000);
-    try{
-      const r=await fetch(relayUrl,{cache:'no-cache',signal:ctrl.signal});
-      clearTimeout(tid);
-      if(!r.ok)throw new Error('http'+r.status);
-      text=await r.text();
-    }catch(e){ clearTimeout(tid); throw new Error('GAS中継失敗:'+e.message); }
-    if(!csvValidator(text))throw new Error('GAS応答が不正');
-  }else{
-    /* 無料CORSプロキシ経由（テスト用・既定） */
-    text=await proxyFetch(envUrl,12000,csvValidator);
-    if(!text)throw new Error('全プロキシ失敗');
-  }
-
-  /* ── CSV解析（標準機能のみ）: 末尾から最初の有効行を採用 ── */
-  const lines=text.replace(/\r/g,'').split('\n');
-  let latest=null;
+  const csvUrl=`https://www.wbgt.env.go.jp/est15WG/dl/wbgt_${ENV_WBGT_POINT}_${ym}.csv`;
+  const text=await proxyFetch(csvUrl,12000,t=>{const s=t.trim();return !s.startsWith('<')&&s.includes(',');});
+  if(!text) throw new Error('全プロキシ失敗');
+  const lines=text.trim().split('\n').filter(l=>l.trim()&&!l.startsWith('Date'));
+  if(!lines.length) throw new Error('empty csv');
+  /* 未来時刻の欄は空欄仕様のため、末尾から遡って最初に見つかる
+     有効値＝最新実況値。日付文字列はCSVがゼロ埋めなし表記
+     （例:2026/7/3）のため、日付一致比較はしない。 */
   for(let i=lines.length-1;i>=0;i--){
-    const line=lines[i].trim();
-    if(!line)continue;
-    const parts=line.split(',');
-    if(parts.length<3)continue;
-    const d=parts[0].trim(), tm=parts[1].trim(), raw=parts[2].trim();
-    /* ヘッダ行・日付形式でない行・空値行はスキップ */
-    if(!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(d))continue;
-    if(raw===''||isNaN(parseInt(raw,10)))continue;
-    latest={time:tm,raw:parseInt(raw,10)};
-    break;
+    const rawVal=lines[i].split(',')[2]?.trim();
+    if(!rawVal)continue;
+    const v=parseFloat(rawVal);
+    if(!isNaN(v))return v;
   }
-  if(!latest)throw new Error('有効データ行なし');
-  const wbgt=Math.round(latest.raw/10*10)/10;  /* ×10格納 → ℃(小数1桁) */
-  if(isNaN(wbgt))throw new Error('数値変換失敗');
-  return {val:wbgt,time:latest.time};
+  throw new Error('有効な実況値なし');
 }
 
-let wbgtInFlight=false, wbgtRetryTimer=null;
-async function fetchEnvWbgt(){
-  if(wbgtInFlight)return false;          /* 多重実行防止（初期起動と天気更新の競合対策） */
-  wbgtInFlight=true;
-  if(wbgtRetryTimer){clearTimeout(wbgtRetryTimer);wbgtRetryTimer=null;}
+async function fetchEnvWbgtForDisplayMode(){
   try{
-    const now=new Date();
-    const mo=now.getMonth()+1, da=now.getDate();
-    const inSeason=(mo>4||(mo===4&&da>=22))&&(mo<10||(mo===10&&da<=21));
-    if(!inSeason){
-      applyWbgt(null,'夏季外（情報提供期間外）');
-      return false;
-    }
-
-    /* ① 環境省SP実況ページ（サーバー側埋め込み値）— 主経路（CORSプロキシ経由） */
-    try{
-      const r=await fetchEnvWbgtSpPage();
-      envWbgtLastVal=r.val;
-      applyWbgt(r.val,`環境省・豊田 ${r.timeText||''}`.trim());
-      return true;
-    }catch(e){
-      console.warn('[WBGT-SP] 取得エラー:',e.message);
-    }
-
-    /* ② フォールバック: 実況値CSV（1地点・当月／GAS・プロキシ切替対応） */
-    try{
-      const r=await fetchEnvWbgtCsv();
-      envWbgtLastVal=r.val;
-      const via=WBGT_CFG.mode==='gas'?'環境省CSV/GAS':'環境省CSV';
-      applyWbgt(r.val,`${via} ${r.time||''}`.trim());
-      return true;
-    }catch(e){
-      console.warn('[WBGT-CSV] 取得エラー:',e.message);
-    }
-
-    /* ③ フォールバック: 環境省WebAPI（実況推定値・JSON） */
-    const fmtDT=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}0000`;
-    try{
-      const r=await fetchEnvWbgtApi(fmtDT(new Date(now.getTime()-6*3600*1000)),fmtDT(now));
-      if(!isNaN(r.val)){
-        envWbgtLastVal=r.val;
-        applyWbgt(r.val,'環境省・豊田(API)');
-        return true;
-      }
-      throw new Error('値なし');
-    }catch(e){
-      console.warn('[WBGT-API] 取得エラー:',e.message);
-    }
-
-    /* 全経路失敗: 前回取得値（メモリ→localStorage）で表示を維持し、60秒後に自動再試行 */
-    let cached=null;
-    if(envWbgtLastVal!=null){cached={v:envWbgtLastVal,s:''};}
-    else{try{cached=JSON.parse(localStorage.getItem('wbgt_cache')||'null');}catch(e){}}
-    if(cached&&cached.v!=null){
-      const ct=cached.t?` ${pad(new Date(cached.t).getHours())}:${pad(new Date(cached.t).getMinutes())}取得`:'';
-      applyWbgt(cached.v,`前回値${ct}（再取得中）`);
-    }else{
-      applyWbgt(null,'取得失敗（再取得中）');
-    }
-    wbgtRetryTimer=setTimeout(()=>{wbgtRetryTimer=null;fetchEnvWbgt();},60*1000);
-    return false;
-  }finally{
-    wbgtInFlight=false;
+    const val=await fetchEnvWbgtOfficialCsv();
+    dmWbgtLastVal=val;
+    return val;
+  }catch(e){
+    console.warn('[DM-WBGT-CSV] 取得エラー:',e.message);
+    return dmWbgtLastVal;
   }
 }
-
-/* ── 起動時処理：天気取得(fetchWeather)から独立してWBGTを即時取得する。
-   Open-Meteo側の失敗や遅延に巻き添えされず、必ず初回表示を試みる。
-   まずlocalStorageの前回値を即時表示し、裏で最新値を取得して上書き。 ── */
-(function(){
-  try{
-    const c=JSON.parse(localStorage.getItem('wbgt_cache')||'null');
-    if(c&&c.v!=null&&Date.now()-(c.t||0)<24*3600*1000){
-      const d=new Date(c.t);
-      applyWbgt(c.v,`前回値 ${pad(d.getHours())}:${pad(d.getMinutes())}取得（更新中）`);
-    }
-  }catch(e){}
-  fetchEnvWbgt();
-})();
 
 async function fetchWeather(){
   try{
@@ -1969,12 +1877,33 @@ async function fetchWeather(){
     const uv=c.uv_index;
     const snowCm=Math.round((c.snowfall||0)*10)/10;
 
+    /* 雷発生確率: 気象庁 雷ナウキャスト（実観測ベース・活動度0〜4）を優先取得。
+       失敗した場合のみ、従来の天気コード等からの簡易推定にフォールバックする。 */
+    let ltPct=0, ltSrc='気象庁雷ナウキャスト（活動なし）';
+    try{
+      const lv=await fetchJmaThunderLevel(CFG.lat,CFG.lon);
+      const LV_PCT={0:0,1:30,2:55,3:75,4:95};
+      const LV_LABEL={0:'活動なし',1:'活動度1(1時間以内に可能性)',2:'活動度2(雷あり)',3:'活動度3',4:'活動度4(激しい雷)'};
+      ltPct=LV_PCT[lv]??0;
+      ltSrc=`気象庁雷ナウキャスト ${LV_LABEL[lv]}`;
+    }catch(e){
+      console.warn('[雷ナウキャスト] 取得エラー:',e.message);
+      /* フォールバック: 簡易推定（雨＋気温乱高下＋天気コード） */
+      if([95,96,99].includes(c.weather_code))ltPct=85;
+      else if([82].includes(c.weather_code))ltPct=40;
+      else if([81,80,65,63].includes(c.weather_code))ltPct=15;
+      const hour=new Date().getHours();
+      if(temp>=28&&rh>=70&&hour>=12&&hour<=20)ltPct=Math.max(ltPct,30);
+      ltSrc='簡易推定（気象庁データ取得失敗のためフォールバック）';
+    }
+
     /* DOM update */
     document.getElementById('wx-icon').textContent=wmo[0];
     document.getElementById('wx-desc').textContent=wmo[1];
     document.getElementById('wx-temp').textContent=temp;
     document.getElementById('wx-feel').textContent=feel;
     document.getElementById('wx-hum').textContent=rh;
+    document.getElementById('wx-thunder').textContent=ltPct;
     document.getElementById('wx-wind-spd').textContent=Math.round(wind*10)/10;
     document.getElementById('wx-wind-arr').style.transform=`rotate(${(windDir||0)+180}deg)`;
     document.getElementById('wx-wind-arr').title=dirJa(windDir);
@@ -1986,6 +1915,9 @@ async function fetchWeather(){
     const col=t=>t>=35?"var(--danger)":t>=28?"var(--warn)":t<=5?"var(--accent)":"var(--safe)";
     document.getElementById('wx-temp').style.color=col(temp);
     document.getElementById('wx-feel').style.color=col(feel);
+    const ltEl=document.getElementById('wx-thunder');
+    ltEl.style.color=ltPct>=60?"var(--danger)":ltPct>=30?"var(--warn)":"#ffaa00";
+    ltEl.title=ltSrc;
 
     /* 日の出・日の入 */
     if(d.daily&&d.daily.sunrise&&d.daily.sunrise[1]){
@@ -3628,32 +3560,13 @@ document.addEventListener('keydown',e=>{
 /* ── 左下：WBGT ── */
 #dm-wbgt-card{border-color:rgba(255,170,0,.22);}
 #dm-wbgt-card::before{background:radial-gradient(ellipse at 50% 30%,rgba(255,170,0,.1) 0%,transparent 65%);}
-
-/* ── 下段：WBGT 大型パネル（全幅） ── */
-#dm-wbgt-big-card{grid-column:1 / -1;border-color:rgba(255,170,0,.22);justify-content:center;padding:clamp(44px,4.5vw,66px) clamp(28px,4vw,64px) clamp(24px,3vw,42px);}
-#dm-wbgt-big-card::before{background:radial-gradient(ellipse at 50% 45%,rgba(255,170,0,.1) 0%,transparent 68%);}
-#dm-wbgt-big-card.wbgt-danger-pulse-big{animation:wbgtDangerPulse 1.8s ease-in-out infinite;}
-#dm-wbgt-big-inner{display:flex;align-items:center;justify-content:center;gap:clamp(30px,6vw,110px);flex-wrap:wrap;width:100%;}
-#dm-wbgt-big-valwrap{display:flex;align-items:baseline;gap:6px;flex-shrink:0;}
-#dm-wbgt-big-val{font-size:clamp(96px,17vw,260px);font-weight:900;font-family:'Share Tech Mono',monospace;line-height:.9;letter-spacing:-.03em;color:#ffaa00;}
-#dm-wbgt-big-unit{font-size:clamp(32px,4.2vw,70px);font-weight:700;color:rgba(255,220,100,.8);}
-#dm-wbgt-big-meta{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,1.6vw,24px);flex-shrink:1;}
-#dm-wbgt-big-badge{display:flex;align-items:center;justify-content:center;padding:clamp(12px,1.4vw,24px) clamp(34px,5.5vw,90px);border-radius:999px;font-size:clamp(30px,3.8vw,66px);font-weight:900;letter-spacing:.1em;transition:all .5s ease;}
-#dm-wbgt-big-note{font-size:clamp(17px,2vw,32px);color:rgba(200,180,100,.85);font-weight:600;text-align:center;line-height:1.5;max-width:92%;}
 #dm-wbgt-val{font-size:clamp(90px,14vw,180px);font-weight:900;font-family:'Share Tech Mono',monospace;line-height:1;letter-spacing:-.03em;flex-shrink:1;}
 #dm-wbgt-val-row{display:flex;align-items:baseline;gap:2px;flex-shrink:1;margin-top:24px;}
 #dm-wbgt-unit{font-size:clamp(26px,3.2vw,46px);font-weight:700;color:rgba(255,220,100,.8);flex-shrink:1;}
 #dm-wbgt-lvl-badge{display:flex;align-items:center;justify-content:center;padding:clamp(10px,1.2vw,18px) clamp(28px,4vw,64px);border-radius:999px;font-size:clamp(24px,3vw,44px);font-weight:900;letter-spacing:.08em;margin-top:6px;transition:all .5s ease;flex-shrink:1;}
 #dm-wbgt-env-note{font-size:clamp(14px,1.6vw,22px);color:rgba(200,180,100,.75);font-weight:500;text-align:center;line-height:1.5;max-width:92%;flex-shrink:1;}
 
-/* ── 右下：雨雲レーダー ── */
-#dm-radar-card{border-color:rgba(0,180,255,.22);padding:clamp(52px,6.5vw,74px) clamp(12px,1.5vw,20px) clamp(12px,1.5vw,20px);justify-content:flex-start;}
-#dm-radar-card::before{background:radial-gradient(ellipse at 50% 30%,rgba(0,180,255,.1) 0%,transparent 65%);}
-#dm-radar-loc{color:rgba(122,179,212,.75);}
-#dm-radar-wrap{position:relative;z-index:1;width:100%;flex:1 1 auto;min-height:0;border-radius:12px;overflow:hidden;background:#040d17;}
-#dm-radar-iframe{width:100%;height:100%;border:none;display:block;}
-
-/* ── 旧・雷確率カード（未使用。要素削除済のため残置は無害） ── */
+/* ── 右下：雷確率 ── */
 #dm-thunder-card{border-color:rgba(255,200,0,.18);}
 #dm-thunder-card::before{background:radial-gradient(ellipse at 50% 30%,rgba(255,180,0,.08) 0%,transparent 65%);}
 #dm-thunder-ring{position:relative;width:clamp(130px,18vw,230px);height:clamp(130px,18vw,230px);flex-shrink:1;margin-top:16px;}
@@ -3939,19 +3852,34 @@ document.addEventListener('keydown',e=>{
 
     </div>
 
-    <!-- 下段：WBGT 暑さ指数（環境省・豊田 実況値）全幅表示 -->
-    <div class="dm-card" id="dm-wbgt-big-card">
-      <span class="dm-card-label">🌡 WBGT 暑さ指数（環境省・豊田）</span>
-      <span class="dm-card-label-time" id="dm-wbgt-big-time"></span>
-      <div id="dm-wbgt-big-inner">
-        <div id="dm-wbgt-big-valwrap">
-          <div id="dm-wbgt-big-val">--</div><div id="dm-wbgt-big-unit">℃</div>
-        </div>
-        <div id="dm-wbgt-big-meta">
-          <div id="dm-wbgt-big-badge" class="wbgt-caution">--</div>
-          <div id="dm-wbgt-big-note">環境省 熱中症警戒アラート基準</div>
+    <!-- 左下：WBGT -->
+    <div class="dm-card" id="dm-wbgt-card">
+      <span class="dm-card-label">🌡 WBGT 暑さ指数</span>
+      <div id="dm-wbgt-val-row">
+        <div id="dm-wbgt-val" style="color:#ffaa00">--</div><div id="dm-wbgt-unit">℃</div>
+      </div>
+      <div id="dm-wbgt-lvl-badge" class="wbgt-caution">--</div>
+      <div id="dm-wbgt-env-note">環境省 熱中症警戒アラート基準</div>
+    </div>
+
+    <!-- 右下：雷確率 -->
+    <div class="dm-card" id="dm-thunder-card">
+      <span class="dm-card-label">⚡ 雷発生確率</span>
+      <div id="dm-thunder-bolt">⚡</div>
+      <div id="dm-thunder-ring">
+        <svg id="dm-thunder-svg" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,200,0,.12)" stroke-width="10"/>
+          <circle id="dm-thunder-arc" cx="50" cy="50" r="42" fill="none"
+            stroke="#ffaa00" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="0 264" style="transition:stroke-dasharray 1.2s ease,stroke .6s"/>
+        </svg>
+        <div id="dm-thunder-pct-wrap">
+          <div id="dm-thunder-pct" style="color:#ffaa00">--</div>
+          <div id="dm-thunder-pct-sym">%</div>
         </div>
       </div>
+      <div id="dm-thunder-label">--</div>
+      <div id="dm-thunder-hint">天気・気温・湿度から推定</div>
     </div>
 
   </div>
@@ -3962,6 +3890,7 @@ document.addEventListener('keydown',e=>{
 
   /* ── ロジック ───────────────────────────────────────────── */
   let dmTimer=null;
+  let dmWbgtTimer=null;
 
   /* ════ テロップ等速スクロール（requestAnimationFrame） ════
      速度: PX_PER_SEC px/秒 固定。文字数・画面幅に関係なく常に同じ速さ。
@@ -4041,6 +3970,62 @@ document.addEventListener('keydown',e=>{
   document.getElementById('dm-scale-up').addEventListener('click',()=>applyDmScale(dmScaleIdx-1));
   document.getElementById('dm-scale-reset').addEventListener('click',()=>applyDmScale(0));
 
+  /* WBGTレベル→Badge設定 */
+  function dmWbgtBadge(w){
+    const badge=document.getElementById('dm-wbgt-lvl-badge');
+    const val=document.getElementById('dm-wbgt-val');
+    const note=document.getElementById('dm-wbgt-env-note');
+    const card=document.getElementById('dm-wbgt-card');
+    let cls,lv,col,tip;
+    if(w===null||w===undefined||isNaN(w)){
+      cls='wbgt-caution';lv='--';col='#aaa';
+      tip='データ取得中';
+    }else if(w>=31){
+      cls='wbgt-danger';lv='🔴 危　険';col='#ff3b3b';
+      tip='運動は原則中止 ／ 特別の場合以外は屋外活動禁止';
+      card.style.borderColor='rgba(255,59,59,.7)';
+    }else if(w>=28){
+      cls='wbgt-severe';lv='🟠 厳重警戒';col='#ff6418';
+      tip='激しい運動は中止 ／ 体力低下者は活動中止';
+      card.style.borderColor='rgba(255,100,30,.5)';
+    }else if(w>=25){
+      cls='wbgt-warning';lv='🟡 警　戒';col='#ffaa00';
+      tip='積極的に休憩 ／ 激しい運動は30分以内';
+      card.style.borderColor='rgba(255,170,0,.45)';
+    }else if(w>=21){
+      cls='wbgt-caution';lv='🔵 注　意';col='#ffe050';
+      tip='熱中症の危険あり ／ 積極的に水分補給';
+      card.style.borderColor='rgba(255,224,80,.4)';
+    }else{
+      cls='wbgt-safe';lv='✅ ほぼ安全';col='#00d97e';
+      tip='通常活動可 ／ 水分補給を忘れずに';
+      card.style.borderColor='rgba(0,217,126,.3)';
+    }
+    val.style.color=col;
+    badge.className='dm-wbgt-lvl-badge '+cls;
+    badge.textContent=lv;
+    note.textContent=tip;
+  }
+
+  /* 雷アーク + ラベル */
+  function dmThunder(pct){
+    const arc=document.getElementById('dm-thunder-arc');
+    const pctEl=document.getElementById('dm-thunder-pct');
+    const lbl=document.getElementById('dm-thunder-label');
+    const bolt=document.getElementById('dm-thunder-bolt');
+    const circ=264;
+    const p=Math.min(100,Math.max(0,pct||0));
+    arc.setAttribute('stroke-dasharray',`${(p/100)*circ} ${circ}`);
+    pctEl.textContent=p;
+    let col,lv;
+    if(p>=60){col='#ff3b3b';lv='⚡ 雷雨の危険が高い';bolt.style.filter='drop-shadow(0 0 18px rgba(255,60,60,.8))';}
+    else if(p>=30){col='#ff8c00';lv='⚡ 雷に注意';bolt.style.filter='drop-shadow(0 0 14px rgba(255,140,0,.7))';}
+    else if(p>=15){col='#ffaa00';lv='注意が必要';bolt.style.filter='drop-shadow(0 0 10px rgba(255,170,0,.5))';}
+    else{col='rgba(180,160,80,.7)';lv='雷の恐れは低い';bolt.style.filter='none';}
+    arc.setAttribute('stroke',col);
+    pctEl.style.color=col;
+    lbl.textContent=lv;
+  }
 
   /* メイン更新：既存DOM値を読み取って反映 */
   function dmUpdate(){
@@ -4072,9 +4057,14 @@ document.addEventListener('keydown',e=>{
       document.getElementById('dm-today-pp').textContent=td.pp;
       
       document.getElementById('dm-today-label-date').textContent=td.dateLabel;
-    }
-    /* WBGT大型パネル：保持している最新の実況値を反映（定期更新で随時上書き） */
-    renderWbgtBig(window.currentWbgt, window.currentWbgtSrc);
+    }   /* WBGT（環境省実況値CSV・PDF準拠の取得値を使用） */
+    const wbgt=dmWbgtLastVal;
+    document.getElementById('dm-wbgt-val').textContent=wbgt==null?'--':wbgt;
+    dmWbgtBadge(wbgt);
+
+    /* 雷確率 */
+    const ltTxt=document.getElementById('wx-thunder')?.textContent;
+    dmThunder(parseInt(ltTxt)||0);
 
     /* テロップ：既存テロップバーの状態を複製 */
     const srcBar=document.getElementById('telop-bar');
@@ -4118,6 +4108,7 @@ document.addEventListener('keydown',e=>{
       overlay.classList.remove('open');
       btn?.classList.remove('active');
       if(dmTimer){clearInterval(dmTimer);dmTimer=null;}
+      if(dmWbgtTimer){clearInterval(dmWbgtTimer);dmWbgtTimer=null;}
       stopDmTelop();
     }else{
       overlay.classList.add('open');
@@ -4125,7 +4116,10 @@ document.addEventListener('keydown',e=>{
       /* スケールを復元して適用 */
       applyDmScale(dmScaleIdx);
       dmUpdate();dmClock();
-      /* 10秒ごとに値を再読み込み */
+      /* WBGT: PDF準拠の実況値CSVを即時取得＋3分毎に再取得 */
+      fetchEnvWbgtForDisplayMode().then(dmUpdate);
+      dmWbgtTimer=setInterval(()=>fetchEnvWbgtForDisplayMode().then(dmUpdate),3*60*1000);
+      /* 10秒ごとに他の値（気温・雷・テロップ）を再読み込み */
       dmTimer=setInterval(()=>{dmUpdate();dmClock();},10000);
       /* 毎秒時計を更新 */
       setInterval(dmClock,1000);
